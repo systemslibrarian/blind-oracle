@@ -10,6 +10,8 @@
 
 Blind Oracle is a live demonstration of **homomorphic encryption** — a branch of cryptography that allows a server to perform calculations on encrypted data without ever decrypting it.
 
+**The simple version:** Imagine handing someone a locked safe containing two number tiles. They shake the safe in a specific way that rearranges the tiles to show their sum — without ever opening it. When you unlock it, the answer is inside. They did the math. They never saw the numbers.
+
 You type two numbers. Your browser encrypts them into mathematical ciphertext blobs. Those blobs travel to a server. The server adds them together — using only the scrambled ciphertext, with no ability to read the underlying values. The encrypted result comes back. Your browser decrypts it.
 
 The server computed the answer without knowing the question.
@@ -98,9 +100,42 @@ Two-repo deployment — one codebase:
 | Component | Stack | Hosting |
 |---|---|---|
 | Frontend | Vite + TypeScript | GitHub Pages |
-| Backend | Node.js + Express + node-seal | Render (free tier) |
+| Backend | Node.js + Express + node-seal | Render |
 
-The backend may take up to 30 seconds to wake from sleep on first request (Render free tier cold start). The UI shows a `WAKING THE ORACLE...` state during this.
+---
+
+## API Reference
+
+The backend exposes a single endpoint:
+
+### `POST /compute/add`
+
+Adds two encrypted integers homomorphically.
+
+**Request:**
+```json
+{
+  "ciphertextA": "<base64 SEAL ciphertext ~100KB>",
+  "ciphertextB": "<base64 SEAL ciphertext ~100KB>"
+}
+```
+
+**Response:**
+```json
+{
+  "ciphertextResult": "<base64 SEAL ciphertext>",
+  "plaintextAccessed": false
+}
+```
+
+**Example (curl):**
+```bash
+curl -X POST https://blind-oracle-api.onrender.com/compute/add \
+  -H "Content-Type: application/json" \
+  -d '{"ciphertextA": "...", "ciphertextB": "..."}'
+```
+
+The `plaintextAccessed: false` field confirms the server never decrypted your data. Both ciphertexts must be encrypted with compatible SEAL parameters (see "The Crypto" section).
 
 ---
 
