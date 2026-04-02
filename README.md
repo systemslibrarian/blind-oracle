@@ -16,7 +16,7 @@ You type two numbers. Your browser encrypts them using TFHE-rs WASM. Those encry
 
 The server computed the answer without knowing the question.
 
-Open DevTools → Network tab while using the demo. You will see the actual ciphertext payloads over the wire. That is the proof.
+Open DevTools → Network tab while using the demo. You will see the actual ciphertext payloads traveling over the wire — not plaintext, not tokens, raw ciphertext.
 
 ---
 
@@ -29,7 +29,7 @@ What does this mean?
 - **No circuit depth limit**: Every operation refreshes the noise budget automatically. You can chain unlimited operations on encrypted data.
 - **Client-side WASM**: Key generation and encryption/decryption happen in your browser using TFHE-rs compiled to WebAssembly.
 - **Server-side native Rust**: The server runs TFHE-rs natively for maximum performance during homomorphic computation.
-- **Cross-platform serialization**: Ciphertexts serialize identically between JS/WASM and Rust, enabling true end-to-end FHE.
+- **Cross-platform serialization**: The browser and server use compatible TFHE-rs serialization formats, enabling true end-to-end FHE.
 
 The tradeoff: key generation takes 10-15 seconds in the browser. This is the cost of generating the bootstrapping keys that enable unlimited computation depth. It's worth it.
 
@@ -141,7 +141,7 @@ Adds two encrypted FheUint8 values homomorphically.
 }
 ```
 
-The `plaintextAccessed: false` field confirms the server never decrypted your data.
+The `plaintextAccessed: false` field is a server-side assertion, not a cryptographic proof. The actual guarantee is structural: the server holds only an evaluation key (ServerKey), which is mathematically insufficient for decryption.
 
 ---
 
