@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blind Oracle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="dot-grid"></div>
+    <main class="app-grid">
+      <section class="zone zone-questioner">
+        <p class="zone-label zone-label-green">THE QUESTIONER</p>
+        <p class="zone-subtext zone-subtext-green">Your keys. Your values. Your world.</p>
+
+        <div class="explain-card" aria-label="How the demo works">
+          <p class="explain-title">HOW THIS DEMO WORKS</p>
+          <ol class="explain-steps">
+            <li>Your browser generates keys and encrypts your numbers.</li>
+            <li>Only ciphertext is sent over the wire to the Oracle.</li>
+            <li>The Oracle adds ciphertexts and returns ciphertext.</li>
+            <li>Your browser decrypts locally and reveals the sum.</li>
+          </ol>
+          <p class="explain-note">
+            This is homomorphic encryption (BFV, leveled HE), not bootstrapped FHE.
+          </p>
+        </div>
+
+        <label class="field-label" for="value-a">SECRET VALUE A</label>
+        <input id="value-a" data-input-a type="number" min="0" max="999999" value="100" />
+
+        <label class="field-label" for="value-b">SECRET VALUE B</label>
+        <input id="value-b" data-input-b type="number" min="0" max="999999" value="200" />
+
+        <button class="action action-green" data-encrypt>[ ENCRYPT &amp; TRANSMIT ]</button>
+
+        <div class="key-status">
+          <span class="dot"></span>
+          <span>DECRYPTION KEY: LOCAL ONLY</span>
+        </div>
+      </section>
+
+      <section class="zone zone-wire">
+        <p class="zone-label zone-label-wire">ENCRYPTED WIRE</p>
+        <div class="scheme-badge">
+          <span>Microsoft SEAL · BFV Scheme · Leveled HE</span>
+          <button class="info-btn" data-open-info aria-label="What is Leveled HE?">[?]</button>
+        </div>
+        <canvas id="wire-canvas"></canvas>
+        <div class="response-time">RESPONSE TIME: <span data-response-time>--ms</span></div>
+        <div class="pulse pulse-top"></div>
+        <div class="pulse pulse-bottom"></div>
+      </section>
+
+      <section class="zone zone-oracle">
+        <p class="zone-label zone-label-orange">THE BLIND ORACLE</p>
+        <p class="zone-subtext zone-subtext-orange">Evaluation key only. Cannot decrypt.</p>
+
+        <div class="cipher-panel">
+          <p class="cipher-title">ct_a preview</p>
+          <p class="cipher-body" data-ct-a-preview>awaiting ciphertext A...</p>
+        </div>
+
+        <div class="cipher-panel">
+          <p class="cipher-title">ct_b preview</p>
+          <p class="cipher-body" data-ct-b-preview>awaiting ciphertext B...</p>
+        </div>
+
+        <button class="action action-orange" data-compute disabled>[ COMPUTE (HE ADD) ]</button>
+
+        <div class="oracle-log" data-oracle-log></div>
+      </section>
+    </main>
+
+    <aside class="result-bar" data-result-bar>
+      <div>
+        <p class="result-label">THE ORACLE COMPUTED THIS WITHOUT EVER KNOWING EITHER VALUE.</p>
+        <p class="result-value" data-result-value>0</p>
+      </div>
+      <div class="result-controls">
+        <button class="action action-ghost" data-open-inspector>[ WHAT THE ORACLE SAW ]</button>
+        <button class="action action-ghost" data-reset>[ RESET ]</button>
+      </div>
+    </aside>
+
+    <div class="system-status">STATE: <span data-state>BOOTING</span></div>
+    <p class="error" data-error hidden></p>
+
+    <dialog class="inspector-modal" data-inspector-modal>
+      <h2>WHAT THE ORACLE SAW</h2>
+      <p class="verdict">PLAINTEXT VALUES PROCESSED BY ORACLE: 0</p>
+      <div class="modal-grid">
+        <section>
+          <h3>ct_a</h3>
+          <pre data-modal-ct-a></pre>
+        </section>
+        <section>
+          <h3>ct_b</h3>
+          <pre data-modal-ct-b></pre>
+        </section>
+        <section>
+          <h3>ct_result</h3>
+          <pre data-modal-ct-r></pre>
+        </section>
+      </div>
+      <button class="action action-orange" data-close-inspector>[ CLOSE ]</button>
+    </dialog>
+
+    <dialog class="info-modal" data-info-modal>
+      <h2>What is Homomorphic Encryption?</h2>
+      <div class="info-content">
+        <p>HE lets a server compute on your encrypted data without decrypting it.</p>
+        <p>The <strong>BFV scheme</strong> used here is "leveled" — it supports addition and multiplication up to a fixed circuit depth before noise overwhelms the ciphertext.</p>
+        <p>True <strong>Fully Homomorphic Encryption</strong> (TFHE-rs) removes this limit via gate bootstrapping, but browser support is still maturing.</p>
+        <p>This demo shows the core concept accurately: <em>the server added your two values and never saw either.</em> That is real, and it matters.</p>
+      </div>
+      <button class="action action-green" data-close-info>[ CLOSE ]</button>
+    </dialog>
+
+    <details class="devtools-panel">
+      <summary>◆ OPEN DEVTOOLS → NETWORK TAB</summary>
+      <div class="devtools-content">
+        <p>Watch the real ciphertext blobs travel over the wire.</p>
+        <p><code>POST /compute/add</code> ← your two encrypted values</p>
+        <p><code>← ctResult</code> → encrypted sum the server cannot read</p>
+        <div class="last-request" data-last-request hidden>
+          <p class="req-label">Last request payload preview:</p>
+          <pre data-req-preview></pre>
+        </div>
+      </div>
+    </details>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
