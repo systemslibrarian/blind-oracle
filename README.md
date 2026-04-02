@@ -8,11 +8,11 @@
 
 ## What This Is
 
-Blind Oracle is a live demonstration of **homomorphic encryption** — a branch of cryptography that allows a server to perform calculations on encrypted data without ever decrypting it.
+Blind Oracle is a live demonstration of **Fully Homomorphic Encryption (FHE)** — a branch of cryptography that allows a server to perform calculations on encrypted data without ever decrypting it.
 
 **The simple version:** Imagine handing someone a locked safe containing two number tiles. They shake the safe in a specific way that rearranges the tiles to show their sum — without ever opening it. When you unlock it, the answer is inside. They did the math. They never saw the numbers.
 
-You type two numbers. Your browser encrypts them into mathematical ciphertext blobs. Those blobs travel to a server. The server adds them together — using only the scrambled ciphertext, with no ability to read the underlying values. The encrypted result comes back. Your browser decrypts it.
+You type two numbers. Your browser encrypts them using TFHE-rs WASM. Those encrypted blobs travel to a server running native TFHE-rs. The server adds them together — using only the scrambled ciphertext, with no ability to read the underlying values. The encrypted result comes back. Your browser decrypts it.
 
 The server computed the answer without knowing the question.
 
@@ -20,11 +20,26 @@ Open DevTools → Network tab while using the demo. You will see the actual ciph
 
 ---
 
+## True FHE via Gate Bootstrapping
+
+This demo uses **TFHE-rs** by Zama AI — a true Fully Homomorphic Encryption library. Unlike leveled HE schemes (BFV, CKKS), TFHE-rs performs **gate bootstrapping** on every operation.
+
+What does this mean?
+
+- **No circuit depth limit**: Every operation refreshes the noise budget automatically. You can chain unlimited operations on encrypted data.
+- **Client-side WASM**: Key generation and encryption/decryption happen in your browser using TFHE-rs compiled to WebAssembly.
+- **Server-side native Rust**: The server runs TFHE-rs natively for maximum performance during homomorphic computation.
+- **Cross-platform serialization**: Ciphertexts serialize identically between JS/WASM and Rust, enabling true end-to-end FHE.
+
+The tradeoff: key generation takes 10-15 seconds in the browser. This is the cost of generating the bootstrapping keys that enable unlimited computation depth. It's worth it.
+
+---
+
 ## Why This Matters
 
 Most encryption protects data *in transit* or *at rest*. The moment a server needs to compute on your data, it has to decrypt it first — exposing it to whoever runs that server.
 
-Homomorphic encryption breaks that assumption entirely.
+Fully Homomorphic Encryption breaks that assumption entirely.
 
 **The server can work on your data while it remains encrypted.** The computation happens in a mathematical space where the server is genuinely blind. This is not a trick of access control or key management — the server does not have the key. It mathematically cannot recover your values.
 
@@ -32,10 +47,10 @@ Homomorphic encryption breaks that assumption entirely.
 
 ## Real-World Applications
 
-This is not a theoretical curiosity. HE is already in production and active research across high-stakes domains:
+This is not a theoretical curiosity. FHE is already in production and active research across high-stakes domains:
 
 **Healthcare**
-Hospitals can run statistical analysis on patient records using cloud infrastructure without the cloud provider ever seeing a single patient's data. Genomic research companies are using HE to compute on DNA sequences while keeping the sequences private.
+Hospitals can run statistical analysis on patient records using cloud infrastructure without the cloud provider ever seeing a single patient's data. Genomic research companies are using FHE to compute on DNA sequences while keeping the sequences private.
 
 **Finance**
 Banks can run fraud detection and credit scoring on encrypted transaction histories. The scoring model never learns your actual financial data — only the encrypted version passes through it.
@@ -44,10 +59,10 @@ Banks can run fraud detection and credit scoring on encrypted transaction histor
 Zama AI (the team behind TFHE-rs) is building encrypted machine learning inference. You send an encrypted image; the model classifies it; you receive an encrypted result. The model never sees your photo. This has profound implications for medical imaging, biometric authentication, and private search.
 
 **Government and Defense**
-DARPA has funded multiple fully homomorphic encryption programs specifically for computing on classified data using hardware that cannot be fully trusted. HE removes the need to trust the infrastructure.
+DARPA has funded multiple fully homomorphic encryption programs specifically for computing on classified data using hardware that cannot be fully trusted. FHE removes the need to trust the infrastructure.
 
 **Cloud Computing**
-The foundational promise of HE for cloud: use cloud compute on sensitive data without trusting the cloud provider. Google, Microsoft, and IBM all have active HE research divisions.
+The foundational promise of FHE for cloud: use cloud compute on sensitive data without trusting the cloud provider. Google, Microsoft, and IBM all have active FHE research divisions.
 
 ---
 
@@ -56,51 +71,45 @@ The foundational promise of HE for cloud: use cloud compute on sensitive data wi
 ```
 BROWSER                              SERVER
 ───────                              ──────
-Generates encryption key pair
+Generates FHE key pair (10-15s)
+  → Client key (stays here)
+  → Server key (for evaluation)
 Encrypts Value A              ──→
-Encrypts Value B              ──→    Receives ciphertext blobs
-                                     evaluator.add(ct_a, ct_b)
+Encrypts Value B              ──→    Receives ciphertext blobs + server key
+                                     fhe_add(ct_a, ct_b) with gate bootstrapping
                                      Returns ct_result
 Receives encrypted result     ←──    [cannot decrypt its own output]
 Decrypts result locally
 Displays the sum
 ```
 
-The server holds an evaluation key — it can perform mathematical operations on ciphertexts but cannot recover plaintext. Every response includes `plaintextAccessed: false`. The server's log shows only the first 12 characters of each ciphertext blob it received.
+The server receives a **compressed server key** — it can perform FHE operations on ciphertexts but cannot recover plaintext. Every response includes `plaintextAccessed: false`. The client key (secret key) never leaves your browser.
 
 ---
 
 ## The Crypto
 
-**Library:** Microsoft SEAL via [node-seal](https://github.com/s0l0ist/node-seal) v5.1.7  
-**Scheme:** BFV (Brakerski/Fan-Vercauteren)  
-**Security:** 128-bit (`tc128`)  
-**Parameters:** `polyModulusDegree: 4096`, `plainModulusBitSize: 20`
+**Library:** [TFHE-rs](https://github.com/zama-ai/tfhe-rs) by Zama AI  
+**Client:** TFHE-rs WASM (tfhe npm package)  
+**Server:** TFHE-rs native Rust  
+**Type:** FheUint8 (0-255 range)  
+**Bootstrapping:** Gate bootstrapping on every operation  
+**Circuit Depth:** Unlimited
 
-This is **leveled homomorphic encryption** — real HE with a bounded circuit depth. It supports addition and multiplication on ciphertexts up to a noise budget limit. Each encrypted integer is approximately 100KB as a base64 blob. You can see these in the DevTools Network tab during the demo.
+This is **Fully Homomorphic Encryption** — real FHE with no circuit depth limit. Each encrypted integer is approximately 10-50KB as a base64 blob. The server key is larger (~5-10MB) and is transmitted once per session. You can see these in the DevTools Network tab during the demo.
 
----
-
-## Why Not Fully Homomorphic Encryption?
-
-True FHE removes the circuit depth limit entirely through a process called **gate bootstrapping** — every operation automatically refreshes the noise budget, allowing unlimited computation depth on encrypted data.
-
-[TFHE-rs by Zama AI](https://github.com/zama-ai/tfhe-rs) is the leading FHE library and does exactly this in Rust. However, as of this writing, the JavaScript/WASM bindings for TFHE-rs expose only key generation, encryption, and decryption — not server-side computation. The official docs confirm: *"The JS API does not support FHE computations."*
-
-A server-side implementation would require native Rust, which is a meaningful architecture change. This project uses Microsoft SEAL instead because `node-seal` exposes `evaluator.add()` in JavaScript — making an honest, end-to-end browser demo possible today.
-
-When Zama AI extends their JS bindings to include compute methods, this project will upgrade. The upgrade path is already documented in the codebase.
+Key generation takes 10-15 seconds in the browser. This is normal — TFHE-rs generates bootstrapping key material that enables unlimited computation depth. The tradeoff is worth it.
 
 ---
 
 ## Architecture
 
-Two-repo deployment — one codebase:
+Two-repo deployment — full FHE stack:
 
 | Component | Stack | Hosting |
 |---|---|---|
-| Frontend | Vite + TypeScript | GitHub Pages |
-| Backend | Node.js + Express + node-seal | Render |
+| Frontend | Vite + TypeScript + TFHE-rs WASM | GitHub Pages |
+| Backend | Rust + Axum + TFHE-rs native | Render |
 
 ---
 
@@ -110,41 +119,37 @@ The backend exposes a single endpoint:
 
 ### `POST /compute/add`
 
-Adds two encrypted integers homomorphically.
+Adds two encrypted FheUint8 values homomorphically.
 
 **Request:**
 ```json
 {
-  "ciphertextA": "<base64 SEAL ciphertext ~100KB>",
-  "ciphertextB": "<base64 SEAL ciphertext ~100KB>"
+  "serverKey": "<base64 compressed server key ~5-10MB>",
+  "ctA": "<base64 FheUint8 ciphertext>",
+  "ctB": "<base64 FheUint8 ciphertext>"
 }
 ```
 
 **Response:**
 ```json
 {
-  "ciphertextResult": "<base64 SEAL ciphertext>",
-  "plaintextAccessed": false
+  "ctResult": "<base64 FheUint8 ciphertext>",
+  "operation": "tfhe_fhe_add",
+  "plaintextAccessed": false,
+  "scheme": "TFHE-rs",
+  "bootstrapping": "gate_bootstrapping_per_operation"
 }
 ```
 
-**Example (curl):**
-```bash
-curl -X POST https://blind-oracle-api.onrender.com/compute/add \
-  -H "Content-Type: application/json" \
-  -d '{"ciphertextA": "...", "ciphertextB": "..."}'
-```
-
-The `plaintextAccessed: false` field confirms the server never decrypted your data. Both ciphertexts must be encrypted with compatible SEAL parameters (see "The Crypto" section).
+The `plaintextAccessed: false` field confirms the server never decrypted your data.
 
 ---
 
 ## Local Setup
 
 ```bash
-# Backend first (blind-oracle-api repo)
-npm install
-node index.js
+# Backend first (blind-oracle-api repo - Rust)
+cargo run
 
 # Frontend (this repo)
 npm install
@@ -152,13 +157,15 @@ npm run dev
 # Requires VITE_API_URL in .env.development → http://localhost:3001
 ```
 
+**Note:** SharedArrayBuffer is required for TFHE-rs WASM. The `coi-serviceworker` package enables this automatically on GitHub Pages. For local development, Vite serves with the necessary headers.
+
 ---
 
 ## Credits
 
-- [Microsoft SEAL](https://github.com/microsoft/SEAL) — Homomorphic encryption library
-- [node-seal](https://github.com/s0l0ist/node-seal) — JavaScript bindings for SEAL
-- [TFHE-rs](https://github.com/zama-ai/tfhe-rs) — Zama AI's FHE library (future upgrade path)
+- [TFHE-rs](https://github.com/zama-ai/tfhe-rs) — Zama AI's Fully Homomorphic Encryption library
+- [tfhe npm package](https://www.npmjs.com/package/tfhe) — TFHE-rs WebAssembly bindings
+- [coi-serviceworker](https://github.com/nickvdyck/coi-serviceworker) — Cross-Origin Isolation for SharedArrayBuffer
 - [Vite](https://vitejs.dev) — Frontend build tooling
 
 ---

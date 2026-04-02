@@ -4,6 +4,8 @@ export interface ComputeResult {
   ctResultBase64: string
   operation: string
   plaintextAccessed: boolean
+  scheme: string
+  bootstrapping: string
   responseTimeMs: number
 }
 
@@ -12,7 +14,7 @@ export class InvalidCiphertextError extends Error {}
 export class OracleInitializingError extends Error {}
 export class OracleTimeoutError extends Error {}
 
-const DEFAULT_TIMEOUT_MS = 45000
+const DEFAULT_TIMEOUT_MS = 120000 // Increased for FHE computation
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -38,14 +40,15 @@ export async function checkHealth(): Promise<boolean> {
     if (!response.ok) {
       return false
     }
-    const json = (await response.json()) as { seal?: string }
-    return json.seal === 'ready'
+    const json = (await response.json()) as { fhe?: boolean; status?: string }
+    return json.fhe === true || json.status === 'ok'
   } catch {
     return false
   }
 }
 
 export async function computeAdd(
+  serverKeyB64: string,
   ctABase64: string,
   ctBBase64: string,
   onWake?: () => void
@@ -63,7 +66,11 @@ export async function computeAdd(
       fetch(`${API_URL}/compute/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ctA: ctABase64, ctB: ctBBase64 })
+        body: JSON.stringify({
+          serverKey: serverKeyB64,
+          ctA: ctABase64,
+          ctB: ctBBase64
+        })
       }),
       DEFAULT_TIMEOUT_MS
     )
@@ -73,6 +80,8 @@ export async function computeAdd(
       ctResult?: string
       operation?: string
       plaintextAccessed?: boolean
+      scheme?: string
+      bootstrapping?: string
       error?: string
     }
 
@@ -94,6 +103,8 @@ export async function computeAdd(
       ctResultBase64: json.ctResult,
       operation: json.operation,
       plaintextAccessed: Boolean(json.plaintextAccessed),
+      scheme: json.scheme ?? 'TFHE-rs',
+      bootstrapping: json.bootstrapping ?? 'gate_bootstrapping_per_operation',
       responseTimeMs: elapsed
     }
   } catch (error) {

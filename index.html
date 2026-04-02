@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blind Oracle</title>
+    <script src="/blind-oracle/coi-serviceworker.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -27,15 +28,15 @@
             <li>Your browser decrypts locally and reveals the sum.</li>
           </ol>
           <p class="explain-note">
-            This is homomorphic encryption (BFV, leveled HE), not bootstrapped FHE.
+            This is Fully Homomorphic Encryption (TFHE-rs, gate bootstrapping).
           </p>
         </div>
 
-        <label class="field-label" for="value-a">SECRET VALUE A</label>
-        <input id="value-a" data-input-a type="number" min="0" max="999999" value="100" />
+        <label class="field-label" for="value-a">SECRET VALUE A (0-255)</label>
+        <input id="value-a" data-input-a type="number" min="0" max="255" value="50" />
 
-        <label class="field-label" for="value-b">SECRET VALUE B</label>
-        <input id="value-b" data-input-b type="number" min="0" max="999999" value="200" />
+        <label class="field-label" for="value-b">SECRET VALUE B (0-255)</label>
+        <input id="value-b" data-input-b type="number" min="0" max="255" value="50" />
 
         <button class="action action-green" data-encrypt>[ ENCRYPT &amp; TRANSMIT ]</button>
 
@@ -48,8 +49,8 @@
       <section class="zone zone-wire">
         <p class="zone-label zone-label-wire">ENCRYPTED WIRE</p>
         <div class="scheme-badge">
-          <span>Microsoft SEAL · BFV Scheme · Leveled HE</span>
-          <button class="info-btn" data-open-info aria-label="What is Leveled HE?">[?]</button>
+          <span>TFHE-rs · Gate Bootstrapping · True FHE</span>
+          <button class="info-btn" data-open-info aria-label="What is Fully Homomorphic Encryption?">[?]</button>
         </div>
         <canvas id="wire-canvas"></canvas>
         <div class="response-time">RESPONSE TIME: <span data-response-time>--ms</span></div>
@@ -71,7 +72,7 @@
           <p class="cipher-body" data-ct-b-preview>awaiting ciphertext B...</p>
         </div>
 
-        <button class="action action-orange" data-compute disabled>[ COMPUTE (HE ADD) ]</button>
+        <button class="action action-orange" data-compute disabled>[ COMPUTE (FHE ADD) ]</button>
 
         <div class="oracle-log" data-oracle-log></div>
       </section>
@@ -112,12 +113,12 @@
     </dialog>
 
     <dialog class="info-modal" data-info-modal>
-      <h2>What is Homomorphic Encryption?</h2>
+      <h2>What is Fully Homomorphic Encryption?</h2>
       <div class="info-content">
-        <p>HE lets a server compute on your encrypted data without decrypting it.</p>
-        <p>The <strong>BFV scheme</strong> used here is "leveled" — it supports addition and multiplication up to a fixed circuit depth before noise overwhelms the ciphertext.</p>
-        <p>True <strong>Fully Homomorphic Encryption</strong> (TFHE-rs) removes this limit via gate bootstrapping, but browser support is still maturing.</p>
-        <p>This demo shows the core concept accurately: <em>the server added your two values and never saw either.</em> That is real, and it matters.</p>
+        <p>FHE lets a server compute on your encrypted data without decrypting it.</p>
+        <p><strong>TFHE-rs</strong> uses gate bootstrapping — every operation automatically refreshes the noise budget, enabling unlimited computation depth.</p>
+        <p>There is no circuit depth limit. The server computes on your encrypted data without any ability to decrypt it.</p>
+        <p><em>This is the real thing.</em></p>
       </div>
       <button class="action action-green" data-close-info>[ CLOSE ]</button>
     </dialog>

@@ -10,19 +10,20 @@ import {
 import { animateCountUp, WireAnimator } from './animations'
 import {
   decryptResult,
-  encryptInteger,
-  initClientSeal,
-  type ClientSealContext,
-  type EncryptedInt
-} from './clientSeal'
+  encryptValue,
+  initFhe,
+  checkSharedArrayBuffer,
+  type FheContext,
+  type EncryptedValue
+} from './clientFhe'
 import { OracleLog } from './oracleLog'
 import { StateMachine } from './stateMachine'
 
 const state = new StateMachine('BOOTING')
 
-let sealCtx: ClientSealContext | null = null
-let cipherA: EncryptedInt | null = null
-let cipherB: EncryptedInt | null = null
+let fheCtx: FheContext | null = null
+let cipherA: EncryptedValue | null = null
+let cipherB: EncryptedValue | null = null
 let lastResultCt = ''
 
 const statusEl = document.querySelector('[data-state]') as HTMLElement
@@ -78,13 +79,19 @@ async function boot(): Promise<void> {
   clearError()
   state.setState('BOOTING')
 
+  // Check SharedArrayBuffer availability (required for TFHE WASM)
+  if (!checkSharedArrayBuffer()) {
+    setError('SharedArrayBuffer not available. Ensure site is cross-origin isolated.')
+    return
+  }
+
   try {
-    sealCtx = await initClientSeal()
-    oracleLog.logBoot()
+    fheCtx = await initFhe()
+    oracleLog.logBoot(fheCtx.keyGenTimeMs)
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'Unknown initialization error'
-    console.error('[CLIENT SEAL] Boot failure:', error)
-    setError(`Failed to initialize client cryptography runtime: ${detail}`)
+    console.error('[FHE] Boot failure:', error)
+    setError(`Failed to initialize FHE runtime: ${detail}`)
     return
   }
 
@@ -111,18 +118,18 @@ async function boot(): Promise<void> {
   setError('Oracle did not wake in time. Please retry.')
 }
 
-function requireReadyContext(): ClientSealContext {
-  if (!sealCtx || !sealCtx.ready) {
-    throw new Error('Client seal context unavailable')
+function requireReadyContext(): FheContext {
+  if (!fheCtx || !fheCtx.ready) {
+    throw new Error('FHE context unavailable')
   }
-  return sealCtx
+  return fheCtx
 }
 
 function readInputValues(): [number, number] {
   const a = Number(inputA.value)
   const b = Number(inputB.value)
-  if (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || a > 999999 || b < 0 || b > 999999) {
-    throw new Error('Inputs must be integers in the range 0 to 999999')
+  if (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || a > 255 || b < 0 || b > 255) {
+    throw new Error('Inputs must be integers in the range 0 to 255 (FheUint8)')
   }
   return [a, b]
 }
@@ -135,8 +142,8 @@ encryptButton.addEventListener('click', async () => {
     const ctx = requireReadyContext()
 
     state.setState('ENCRYPTING')
-    cipherA = await encryptInteger(a, ctx)
-    cipherB = await encryptInteger(b, ctx)
+    cipherA = await encryptValue(a, ctx)
+    cipherB = await encryptValue(b, ctx)
 
     ctAPreviewEl.textContent = `${cipherA.base64.slice(0, 80)}...`
     ctBPreviewEl.textContent = `${cipherB.base64.slice(0, 80)}...`
@@ -170,14 +177,14 @@ computeButton.addEventListener('click', async () => {
     state.setState('TRANSMITTING')
     animator.triggerTransmission()
 
-    const result = await computeAdd(cipherA.base64, cipherB.base64, () => {
+    const result = await computeAdd(ctx.serverKeyB64, cipherA.base64, cipherB.base64, () => {
       if (state.getState() !== 'WAKING_ORACLE') {
         state.setState('WAKING_ORACLE')
       }
     })
 
     state.setState('ORACLE_COMPUTING')
-    oracleLog.logComputing(result.responseTimeMs)
+    oracleLog.logComputing(result.responseTimeMs, result.scheme, result.bootstrapping)
 
     // Update devtools panel with last request preview
     if (lastRequestEl && reqPreviewEl && cipherA && cipherB) {
