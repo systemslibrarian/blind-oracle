@@ -2,7 +2,7 @@
 
 **The server computed your data. It never saw a single bit.**
 
-[Live Demo](https://systemslibrarian.github.io/blind-oracle/) · [Backend API](https://github.com/systemslibrarian/blind-oracle-api)
+[Live Demo](https://systemslibrarian.github.io/crypto-lab-blind-oracle/) · [Backend API](https://github.com/systemslibrarian/blind-oracle-api)
 
 ---
 
