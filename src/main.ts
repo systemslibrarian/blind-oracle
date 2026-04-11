@@ -51,10 +51,30 @@ const infoOpenBtn = document.querySelector('[data-open-info]') as HTMLButtonElem
 const infoCloseBtn = document.querySelector('[data-close-info]') as HTMLButtonElement
 const lastRequestEl = document.querySelector('[data-last-request]') as HTMLElement
 const reqPreviewEl = document.querySelector('[data-req-preview]') as HTMLElement
+const themeToggleBtn = document.querySelector('[data-theme-toggle]') as HTMLButtonElement | null
 
 const oracleLog = new OracleLog(logEl)
 const animator = new WireAnimator(wireCanvas)
 animator.start()
+
+function getCurrentTheme(): 'dark' | 'light' {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'
+}
+
+function syncThemeToggle(theme: 'dark' | 'light'): void {
+  if (!themeToggleBtn) {
+    return
+  }
+
+  themeToggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️'
+  themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode')
+}
+
+function setTheme(theme: 'dark' | 'light'): void {
+  document.documentElement.setAttribute('data-theme', theme)
+  localStorage.setItem('theme', theme)
+  syncThemeToggle(theme)
+}
 
 function setError(message: string): void {
   state.setState('ERROR')
@@ -67,6 +87,12 @@ function clearError(): void {
   errorEl.hidden = true
   errorEl.textContent = ''
 }
+
+syncThemeToggle(getCurrentTheme())
+themeToggleBtn?.addEventListener('click', () => {
+  const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark'
+  setTheme(nextTheme)
+})
 
 state.onChange((next) => {
   statusEl.textContent = next

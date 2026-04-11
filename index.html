@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blind Oracle</title>
+    <script>
+      (function () {
+        const saved = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', saved ?? 'dark');
+      })();
+    </script>
     <script src="%BASE_URL%coi-serviceworker.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,6 +20,9 @@
   </head>
   <body>
     <div class="dot-grid"></div>
+    <header class="app-header">
+      <button class="theme-toggle" data-theme-toggle aria-label="Switch to light mode">🌙</button>
+    </header>
     <main class="app-grid">
       <section class="zone zone-questioner">
         <p class="zone-label zone-label-green">THE QUESTIONER</p>
@@ -135,6 +144,10 @@
         </div>
       </div>
     </details>
+
+    <footer style="text-align:center; padding: 1.5rem; font-size: 0.85rem; opacity: 0.7; margin-top: 2rem;">
+      Whether you eat or drink or whatever you do, do it all for the glory of God. — 1 Corinthians 10:31
+    </footer>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

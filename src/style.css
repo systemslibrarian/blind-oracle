@@ -7,6 +7,15 @@
   --wire: rgba(255, 255, 255, 0.5);
 }
 
+html[data-theme='light'] {
+  --bg: #f3fbf7;
+  --green: #0d6f5e;
+  --green-soft: rgba(13, 111, 94, 0.35);
+  --orange: #bf4f20;
+  --orange-soft: rgba(191, 79, 32, 0.4);
+  --wire: rgba(7, 7, 15, 0.6);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -38,6 +47,43 @@ body {
   display: grid;
   grid-template-columns: 38% 24% 38%;
   min-height: 100vh;
+}
+
+.app-header {
+  position: relative;
+  z-index: 120;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--green-soft);
+  background: var(--bg);
+  color: var(--green);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  z-index: 140;
+}
+
+.theme-toggle:hover {
+  background: var(--green-soft);
+  border-color: var(--green);
+}
+
+html[data-theme='light'] .theme-toggle {
+  border-color: var(--orange-soft);
+  color: var(--orange);
+}
+
+html[data-theme='light'] .theme-toggle:hover {
+  background: var(--orange-soft);
+  border-color: var(--orange);
 }
 
 .zone {
@@ -336,7 +382,7 @@ input[type='number']:focus {
 
 .system-status {
   position: fixed;
-  top: 12px;
+  top: 62px;
   right: 12px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(12, 12, 18, 0.9);
