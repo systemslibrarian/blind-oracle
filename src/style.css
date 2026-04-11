@@ -393,7 +393,7 @@ input[type='number']:focus {
 
 .error {
   position: fixed;
-  top: 52px;
+  top: 102px;
   right: 12px;
   border: 1px solid rgba(255, 107, 53, 0.6);
   background: rgba(255, 107, 53, 0.2);
@@ -567,4 +567,199 @@ input[type='number']:focus {
   color: rgba(255, 255, 255, 0.6);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* ── Light-theme overrides ── */
+
+html[data-theme='light'],
+html[data-theme='light'] body {
+  color: #1a2a24;
+}
+
+html[data-theme='light'] .dot-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+}
+
+html[data-theme='light'] .zone-questioner {
+  border-right-color: rgba(13, 111, 94, 0.2);
+}
+
+html[data-theme='light'] .zone-subtext-green {
+  color: rgba(13, 111, 94, 0.75);
+}
+
+html[data-theme='light'] .zone-subtext-orange {
+  color: rgba(191, 79, 32, 0.8);
+}
+
+html[data-theme='light'] .explain-card {
+  border-color: rgba(13, 111, 94, 0.25);
+  background: linear-gradient(180deg, rgba(13, 111, 94, 0.06), rgba(13, 111, 94, 0.02));
+}
+
+html[data-theme='light'] .explain-title {
+  color: var(--green);
+}
+
+html[data-theme='light'] .explain-steps {
+  color: #1a2a24;
+}
+
+html[data-theme='light'] .explain-note {
+  color: rgba(13, 111, 94, 0.85);
+}
+
+html[data-theme='light'] .field-label {
+  color: rgba(13, 111, 94, 0.9);
+}
+
+html[data-theme='light'] input[type='number'] {
+  background: rgba(13, 111, 94, 0.06);
+}
+
+html[data-theme='light'] input[type='number']:focus {
+  box-shadow: 0 0 0 1px rgba(13, 111, 94, 0.5);
+}
+
+html[data-theme='light'] .key-status {
+  color: rgba(13, 111, 94, 0.9);
+}
+
+html[data-theme='light'] .zone-wire {
+  border-right-color: rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme='light'] .scheme-badge {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme='light'] .info-btn {
+  border-color: rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme='light'] #wire-canvas {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: linear-gradient(180deg, rgba(13, 111, 94, 0.04), rgba(191, 79, 32, 0.04));
+}
+
+html[data-theme='light'] .response-time {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+html[data-theme='light'] .pulse {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme='light'] .cipher-panel {
+  border-color: rgba(191, 79, 32, 0.25);
+  background: rgba(191, 79, 32, 0.04);
+}
+
+html[data-theme='light'] .cipher-title {
+  color: var(--orange);
+}
+
+html[data-theme='light'] .cipher-body {
+  color: #2a1a14;
+}
+
+html[data-theme='light'] .oracle-log {
+  border-color: rgba(191, 79, 32, 0.3);
+  background: rgba(191, 79, 32, 0.04);
+}
+
+html[data-theme='light'] .oracle-line {
+  color: #2a1a14;
+}
+
+html[data-theme='light'] .result-bar {
+  border-color: rgba(13, 111, 94, 0.4);
+  background: rgba(243, 251, 247, 0.96);
+}
+
+html[data-theme='light'] .result-label {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+html[data-theme='light'] .action-ghost {
+  border-color: rgba(0, 0, 0, 0.25);
+  color: #333;
+}
+
+html[data-theme='light'] .system-status {
+  border-color: rgba(0, 0, 0, 0.2);
+  background: rgba(243, 251, 247, 0.92);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+html[data-theme='light'] .error {
+  border-color: rgba(191, 79, 32, 0.5);
+  background: rgba(191, 79, 32, 0.1);
+  color: #5a2010;
+}
+
+html[data-theme='light'] .inspector-modal {
+  background: #f3fbf7;
+  color: #1a2a24;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme='light'] .inspector-modal::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme='light'] .modal-grid pre {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme='light'] .info-modal {
+  background: #f3fbf7;
+  color: #1a2a24;
+  border-color: rgba(13, 111, 94, 0.3);
+}
+
+html[data-theme='light'] .info-modal::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme='light'] .info-content {
+  color: #1a2a24;
+}
+
+html[data-theme='light'] .info-content em {
+  color: rgba(13, 111, 94, 0.85);
+}
+
+html[data-theme='light'] .devtools-panel {
+  background: rgba(243, 251, 247, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme='light'] .devtools-content {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme='light'] .devtools-content code {
+  background: rgba(13, 111, 94, 0.08);
+}
+
+html[data-theme='light'] .last-request {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme='light'] .req-label {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme='light'] .last-request pre {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 980px) {
+  html[data-theme='light'] .zone-questioner,
+  html[data-theme='light'] .zone-wire {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
 }
