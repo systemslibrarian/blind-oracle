@@ -31,7 +31,7 @@ body {
 body {
   font-family: 'Share Tech Mono', monospace;
   font-size: 16px;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .dot-grid {
@@ -325,7 +325,7 @@ input[type='number']:focus {
 }
 
 .oracle-log {
-  min-height: 200px;
+  min-height: 360px;
   flex: 1;
   overflow-y: auto;
   border: 1px solid rgba(255, 123, 69, 0.35);
