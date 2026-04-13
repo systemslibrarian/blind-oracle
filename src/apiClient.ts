@@ -76,23 +76,30 @@ export async function computeAdd(
     )
 
     const elapsed = Math.round(performance.now() - started)
+
+    if (!response.ok) {
+      let errorMsg: string | undefined
+      try {
+        const errBody = (await response.json()) as { error?: string }
+        errorMsg = errBody.error
+      } catch {
+        // Response body is not JSON (e.g. Render proxy HTML error page)
+      }
+      if (response.status === 503) {
+        throw new OracleInitializingError(errorMsg ?? 'Oracle initializing')
+      }
+      if (response.status === 400) {
+        throw new InvalidCiphertextError(errorMsg ?? 'Invalid ciphertext')
+      }
+      throw new OracleOfflineError(errorMsg ?? `Oracle unavailable (HTTP ${response.status})`)
+    }
+
     const json = (await response.json()) as {
       ctResult?: string
       operation?: string
       plaintextAccessed?: boolean
       scheme?: string
       bootstrapping?: string
-      error?: string
-    }
-
-    if (!response.ok) {
-      if (response.status === 503) {
-        throw new OracleInitializingError(json.error ?? 'Oracle initializing')
-      }
-      if (response.status === 400) {
-        throw new InvalidCiphertextError(json.error ?? 'Invalid ciphertext')
-      }
-      throw new OracleOfflineError(json.error ?? 'Oracle unavailable')
     }
 
     if (!json.ctResult || !json.operation) {
