@@ -36,6 +36,7 @@ const encryptButton = document.querySelector('[data-encrypt]') as HTMLButtonElem
 const computeButton = document.querySelector('[data-compute]') as HTMLButtonElement
 const resultBar = document.querySelector('[data-result-bar]') as HTMLElement
 const resultValueEl = document.querySelector('[data-result-value]') as HTMLElement
+const resultAnnounceEl = document.querySelector('[data-result-announce]') as HTMLElement
 const errorEl = document.querySelector('[data-error]') as HTMLElement
 const ctAPreviewEl = document.querySelector('[data-ct-a-preview]') as HTMLElement
 const ctBPreviewEl = document.querySelector('[data-ct-b-preview]') as HTMLElement
@@ -212,18 +213,29 @@ function requireReadyContext(): FheContext {
   return fheCtx
 }
 
+/** A valid operand is an integer byte in [0, 255]. */
+function isValidByte(raw: string): boolean {
+  if (raw === '') {
+    return false
+  }
+  const n = Number(raw)
+  return Number.isInteger(n) && n >= 0 && n <= 255
+}
+
 function readInputValues(): [number, number] {
   const rawA = inputA.value.trim()
   const rawB = inputB.value.trim()
-  if (rawA === '' || rawB === '') {
-    throw new Error('Enter a value for both A and B (0 to 255)')
-  }
-  const a = Number(rawA)
-  const b = Number(rawB)
-  if (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || a > 255 || b < 0 || b > 255) {
+  const aValid = isValidByte(rawA)
+  const bValid = isValidByte(rawB)
+
+  // Mark fields for assistive tech so the offending input is identifiable.
+  inputA.setAttribute('aria-invalid', String(!aValid))
+  inputB.setAttribute('aria-invalid', String(!bValid))
+
+  if (!aValid || !bValid) {
     throw new Error('Inputs must be integers in the range 0 to 255 (FheUint8)')
   }
-  return [a, b]
+  return [Number(rawA), Number(rawB)]
 }
 
 encryptButton.addEventListener('click', async () => {
@@ -306,6 +318,9 @@ computeButton.addEventListener('click', async () => {
     state.setState('REVEALED')
     resultBar.classList.add('revealed')
     await animateCountUp(resultValueEl, resultValue)
+    // Announce the final total once, after the visual count-up settles, so
+    // screen readers aren't flooded with the intermediate tween values.
+    resultAnnounceEl.textContent = `The Oracle computed on ciphertext only. Decrypted locally, the sum is ${resultValue}.`
   } catch (error) {
     if (error instanceof OracleTimeoutError) {
       setError('Oracle timed out after 45s. Use retry.')
@@ -377,6 +392,9 @@ resetBtn.addEventListener('click', () => {
   ctBPreviewEl.textContent = 'awaiting ciphertext B...'
   responseTimeEl.textContent = '--ms'
   resultValueEl.textContent = '0'
+  resultAnnounceEl.textContent = ''
+  inputA.setAttribute('aria-invalid', 'false')
+  inputB.setAttribute('aria-invalid', 'false')
   modalCtA.textContent = ''
   modalCtB.textContent = ''
   modalCtR.textContent = ''

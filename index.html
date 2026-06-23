@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Blind Oracle — Fully Homomorphic Encryption Demo</title>
     <meta
       name="description"
@@ -98,6 +98,7 @@
           min="0"
           max="255"
           value="50"
+          aria-describedby="form-error"
         />
 
         <label class="field-label" for="value-b">SECRET VALUE B (0-255)</label>
@@ -110,6 +111,7 @@
           min="0"
           max="255"
           value="50"
+          aria-describedby="form-error"
         />
 
         <button class="action action-green" data-encrypt>[ ENCRYPT &amp; TRANSMIT ]</button>
@@ -164,7 +166,7 @@
       </section>
     </main>
 
-    <aside class="result-bar" data-result-bar aria-live="polite">
+    <aside class="result-bar" data-result-bar>
       <div>
         <p class="result-label">THE ORACLE COMPUTED THIS WITHOUT EVER KNOWING EITHER VALUE.</p>
         <p class="result-value" data-result-value>0</p>
@@ -176,7 +178,12 @@
     </aside>
 
     <div class="system-status" aria-live="polite">STATE: <span data-state>BOOTING</span></div>
-    <p class="error" data-error role="alert" hidden></p>
+    <p class="error" id="form-error" data-error role="alert" hidden></p>
+
+    <!-- Dedicated screen-reader announcer for the final result. The visible
+         number animates ~60fps; announcing it directly would flood assistive
+         tech, so the decrypted total is announced here exactly once. -->
+    <p class="visually-hidden" data-result-announce aria-live="polite" aria-atomic="true"></p>
 
     <dialog class="inspector-modal" data-inspector-modal aria-labelledby="inspector-title">
       <h2 id="inspector-title">WHAT THE ORACLE SAW</h2>
