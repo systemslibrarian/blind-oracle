@@ -1,3 +1,11 @@
+/** True when the user has asked the OS to minimise non-essential motion. */
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}
+
 export class WireAnimator {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
@@ -27,10 +35,21 @@ export class WireAnimator {
 
     const columns = Math.floor(this.width / 18)
     this.drops = Array.from({ length: columns }, () => Math.random() * this.height)
+
+    // Under reduced motion there is no animation loop, so repaint a static
+    // frame here to avoid a blank canvas after a viewport resize.
+    if (!this.running && prefersReducedMotion()) {
+      this.drawFrame()
+    }
   }
 
   start(): void {
     if (this.running) {
+      return
+    }
+    // Honour reduced-motion: paint one static frame instead of a running loop.
+    if (prefersReducedMotion()) {
+      this.drawFrame()
       return
     }
     this.running = true
@@ -61,7 +80,9 @@ export class WireAnimator {
     for (let i = 0; i < this.drops.length; i += 1) {
       const x = i * 18
       const y = this.drops[i]
-      const glyph = Math.floor(Math.random() * 16).toString(16).toUpperCase()
+      const glyph = Math.floor(Math.random() * 16)
+        .toString(16)
+        .toUpperCase()
       this.ctx.fillText(glyph, x, y)
       this.drops[i] = y > this.height + 20 ? 0 : y + (burst ? 7 : 4)
     }
@@ -69,6 +90,12 @@ export class WireAnimator {
 }
 
 export function animateCountUp(targetEl: HTMLElement, value: number): Promise<void> {
+  // Reduced motion: skip the tween and show the final value immediately.
+  if (prefersReducedMotion()) {
+    targetEl.textContent = String(value)
+    return Promise.resolve()
+  }
+
   const duration = 900
   const start = performance.now()
 

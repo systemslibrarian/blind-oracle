@@ -16,6 +16,7 @@ import {
   type FheContext,
   type EncryptedValue
 } from './clientFhe'
+import { base64ToHex } from './encoding'
 import { OracleLog } from './oracleLog'
 import { StateMachine } from './stateMachine'
 
@@ -52,6 +53,9 @@ const infoCloseBtn = document.querySelector('[data-close-info]') as HTMLButtonEl
 const lastRequestEl = document.querySelector('[data-last-request]') as HTMLElement
 const reqPreviewEl = document.querySelector('[data-req-preview]') as HTMLElement
 const themeToggleBtn = document.querySelector('[data-theme-toggle]') as HTMLButtonElement | null
+const bootOverlay = document.querySelector('[data-boot-overlay]') as HTMLElement
+const bootDetailEl = document.querySelector('[data-boot-detail]') as HTMLElement
+const bootRetryBtn = document.querySelector('[data-boot-retry]') as HTMLButtonElement
 
 const oracleLog = new OracleLog(logEl)
 const animator = new WireAnimator(wireCanvas)
@@ -67,7 +71,10 @@ function syncThemeToggle(theme: 'dark' | 'light'): void {
   }
 
   themeToggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️'
-  themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode')
+  themeToggleBtn.setAttribute(
+    'aria-label',
+    theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+  )
 }
 
 function setTheme(theme: 'dark' | 'light'): void {
@@ -88,6 +95,35 @@ function clearError(): void {
   errorEl.textContent = ''
 }
 
+function setBootDetail(message: string): void {
+  bootDetailEl.textContent = message
+}
+
+function hideBootOverlay(): void {
+  bootOverlay.classList.add('boot-overlay--hidden')
+}
+
+function showBootError(message: string): void {
+  bootOverlay.classList.remove('boot-overlay--hidden')
+  bootOverlay.classList.add('boot-overlay--error')
+  setBootDetail(message)
+  bootRetryBtn.hidden = false
+}
+
+/** Disable the action controls while an async operation is in flight. */
+function lockControls(): void {
+  encryptButton.disabled = true
+  computeButton.disabled = true
+  resetBtn.disabled = true
+}
+
+/** Re-enable controls after work finishes. Compute requires a live ciphertext. */
+function unlockControls(): void {
+  encryptButton.disabled = false
+  resetBtn.disabled = false
+  computeButton.disabled = !(cipherA && cipherB)
+}
+
 syncThemeToggle(getCurrentTheme())
 themeToggleBtn?.addEventListener('click', () => {
   const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark'
@@ -103,28 +139,44 @@ state.onChange((next) => {
 
 async function boot(): Promise<void> {
   clearError()
+  bootRetryBtn.hidden = true
+  bootOverlay.classList.remove('boot-overlay--error', 'boot-overlay--hidden')
   state.setState('BOOTING')
+  // Keep the action controls disabled (and out of keyboard reach behind the
+  // overlay) until boot reaches READY, so they can't race the boot flow.
+  lockControls()
 
   // Check SharedArrayBuffer availability (required for TFHE WASM)
   if (!checkSharedArrayBuffer()) {
-    setError('SharedArrayBuffer not available. Ensure site is cross-origin isolated.')
+    const msg = 'SharedArrayBuffer not available. Ensure the site is cross-origin isolated.'
+    showBootError(msg)
+    setError(msg)
     return
   }
 
-  try {
-    fheCtx = await initFhe()
-    oracleLog.logBoot(fheCtx.keyGenTimeMs)
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : 'Unknown initialization error'
-    console.error('[FHE] Boot failure:', error)
-    setError(`Failed to initialize FHE runtime: ${detail}`)
-    return
+  // Skip key generation on retry — keys persist across boot attempts, so a
+  // failed oracle wake-up shouldn't cost another ~15s of key gen.
+  if (!fheCtx || !fheCtx.ready) {
+    try {
+      setBootDetail('Generating FHE key pair in your browser (~10–15s)…')
+      fheCtx = await initFhe()
+      oracleLog.logBoot(fheCtx.keyGenTimeMs)
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Unknown initialization error'
+      console.error('[FHE] Boot failure:', error)
+      showBootError(`Failed to initialize FHE runtime: ${detail}`)
+      setError(`Failed to initialize FHE runtime: ${detail}`)
+      return
+    }
   }
 
   state.setState('CHECKING_SERVER')
+  setBootDetail('Keys ready. Contacting the Oracle…')
   const healthy = await checkHealth()
 
   if (healthy) {
+    hideBootOverlay()
+    unlockControls()
     state.setState('READY')
     return
   }
@@ -133,16 +185,25 @@ async function boot(): Promise<void> {
   const wakeDeadline = Date.now() + 45000
 
   while (Date.now() < wakeDeadline) {
+    const secondsLeft = Math.ceil((wakeDeadline - Date.now()) / 1000)
+    setBootDetail(`Waking the Oracle from cold start… (${secondsLeft}s remaining)`)
     await new Promise((resolve) => setTimeout(resolve, 3000))
     const ok = await checkHealth()
     if (ok) {
+      hideBootOverlay()
+      unlockControls()
       state.setState('READY')
       return
     }
   }
 
+  showBootError('Oracle did not wake in time (free-tier cold start). Please retry.')
   setError('Oracle did not wake in time. Please retry.')
 }
+
+bootRetryBtn.addEventListener('click', () => {
+  void boot()
+})
 
 function requireReadyContext(): FheContext {
   if (!fheCtx || !fheCtx.ready) {
@@ -152,8 +213,13 @@ function requireReadyContext(): FheContext {
 }
 
 function readInputValues(): [number, number] {
-  const a = Number(inputA.value)
-  const b = Number(inputB.value)
+  const rawA = inputA.value.trim()
+  const rawB = inputB.value.trim()
+  if (rawA === '' || rawB === '') {
+    throw new Error('Enter a value for both A and B (0 to 255)')
+  }
+  const a = Number(rawA)
+  const b = Number(rawB)
   if (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || a > 255 || b < 0 || b > 255) {
     throw new Error('Inputs must be integers in the range 0 to 255 (FheUint8)')
   }
@@ -162,6 +228,7 @@ function readInputValues(): [number, number] {
 
 encryptButton.addEventListener('click', async () => {
   clearError()
+  lockControls()
 
   try {
     const [a, b] = readInputValues()
@@ -181,11 +248,12 @@ encryptButton.addEventListener('click', async () => {
     animator.triggerTransmission()
     oracleLog.logTransmit(cipherA.base64, cipherB.base64)
 
-    computeButton.disabled = false
     state.setState('READY')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Encryption failed'
     setError(message)
+  } finally {
+    unlockControls()
   }
 })
 
@@ -197,9 +265,11 @@ computeButton.addEventListener('click', async () => {
     return
   }
 
-  const ctx = requireReadyContext()
+  lockControls()
 
   try {
+    const ctx = requireReadyContext()
+
     state.setState('TRANSMITTING')
     animator.triggerTransmission()
 
@@ -226,9 +296,8 @@ computeButton.addEventListener('click', async () => {
     state.setState('RECEIVING')
     responseTimeEl.textContent = `${result.responseTimeMs}ms`
     lastResultCt = result.ctResultBase64
-    modalCtR.textContent = Array.from(lastResultCt)
-      .map((ch) => ch.charCodeAt(0).toString(16).padStart(2, '0'))
-      .join('')
+    // Decode the base64 ciphertext to its true bytes before hex (matches ct_a/ct_b).
+    modalCtR.textContent = base64ToHex(lastResultCt)
 
     state.setState('DECRYPTING')
     oracleLog.logDecrypt()
@@ -256,6 +325,8 @@ computeButton.addEventListener('click', async () => {
     }
 
     setError(error instanceof Error ? error.message : 'Compute failed')
+  } finally {
+    unlockControls()
   }
 })
 
@@ -267,6 +338,13 @@ modalOpenBtn.addEventListener('click', () => {
 
 modalCloseBtn.addEventListener('click', () => {
   modal.close()
+})
+
+// Close the inspector when clicking the backdrop (parity with the info modal).
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    modal.close()
+  }
 })
 
 infoOpenBtn?.addEventListener('click', () => {
@@ -302,6 +380,10 @@ resetBtn.addEventListener('click', () => {
   modalCtA.textContent = ''
   modalCtB.textContent = ''
   modalCtR.textContent = ''
+  if (lastRequestEl && reqPreviewEl) {
+    lastRequestEl.hidden = true
+    reqPreviewEl.textContent = ''
+  }
   resultBar.classList.remove('revealed')
   computeButton.disabled = true
   clearError()

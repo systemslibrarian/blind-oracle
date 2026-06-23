@@ -16,27 +16,33 @@ export class OracleTimeoutError extends Error {}
 
 const DEFAULT_TIMEOUT_MS = 120000 // Increased for FHE computation
 
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timeout = window.setTimeout(() => {
-      reject(new OracleTimeoutError('Oracle request timed out'))
-    }, timeoutMs)
-
-    promise
-      .then((value) => {
-        clearTimeout(timeout)
-        resolve(value)
-      })
-      .catch((error) => {
-        clearTimeout(timeout)
-        reject(error)
-      })
-  })
+/**
+ * Fetch with a hard timeout that actually aborts the underlying request
+ * (rather than leaving it running in the background) and maps the abort to a
+ * typed OracleTimeoutError.
+ */
+async function fetchWithTimeout(
+  input: string,
+  init: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new OracleTimeoutError('Oracle request timed out')
+    }
+    throw error
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 export async function checkHealth(): Promise<boolean> {
   try {
-    const response = await withTimeout(fetch(`${API_URL}/health`), 8000)
+    const response = await fetchWithTimeout(`${API_URL}/health`, {}, 8000)
     if (!response.ok) {
       return false
     }
@@ -54,16 +60,15 @@ export async function computeAdd(
   onWake?: () => void
 ): Promise<ComputeResult> {
   const started = performance.now()
-  let wakeCalled = false
 
-  const wakeTimer = window.setTimeout(() => {
-    wakeCalled = true
+  const wakeTimer = setTimeout(() => {
     onWake?.()
   }, 5000)
 
   try {
-    const response = await withTimeout(
-      fetch(`${API_URL}/compute/add`, {
+    const response = await fetchWithTimeout(
+      `${API_URL}/compute/add`,
+      {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -71,7 +76,7 @@ export async function computeAdd(
           ctA: ctABase64,
           ctB: ctBBase64
         })
-      }),
+      },
       DEFAULT_TIMEOUT_MS
     )
 
@@ -130,8 +135,5 @@ export async function computeAdd(
     throw error
   } finally {
     clearTimeout(wakeTimer)
-    if (wakeCalled) {
-      onWake?.()
-    }
   }
 }

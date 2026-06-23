@@ -3,14 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blind Oracle</title>
+    <title>Blind Oracle — Fully Homomorphic Encryption Demo</title>
+    <meta
+      name="description"
+      content="A browser-to-server demonstration of Fully Homomorphic Encryption (TFHE-rs). Your browser encrypts two numbers, the server adds the ciphertexts without ever decrypting them, and your browser decrypts the result locally."
+    />
+    <meta name="theme-color" content="#07070f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f3fbf7" media="(prefers-color-scheme: light)" />
+
+    <!-- Social / Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Blind Oracle — Fully Homomorphic Encryption Demo" />
+    <meta
+      property="og:description"
+      content="Watch a server compute on encrypted data it can never read. Real TFHE-rs gate bootstrapping, running in your browser."
+    />
+    <meta property="og:url" content="https://systemslibrarian.github.io/crypto-lab-blind-oracle/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Blind Oracle — Fully Homomorphic Encryption Demo" />
+    <meta
+      name="twitter:description"
+      content="Watch a server compute on encrypted data it can never read. Real TFHE-rs gate bootstrapping, running in your browser."
+    />
+
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%2307070f'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%2300ffcc' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23ff7b45'/%3E%3C/svg%3E"
+    />
+
     <script>
-      (function () {
-        const saved = localStorage.getItem('theme');
-        document.documentElement.setAttribute('data-theme', saved ?? 'dark');
-      })();
+      ;(function () {
+        const saved = localStorage.getItem('theme')
+        const prefersLight =
+          typeof window.matchMedia === 'function' &&
+          window.matchMedia('(prefers-color-scheme: light)').matches
+        const theme = saved ?? (prefersLight ? 'light' : 'dark')
+        document.documentElement.setAttribute('data-theme', theme)
+      })()
     </script>
-    <script src="%BASE_URL%coi-serviceworker.js"></script>
+    <script src="/coi-serviceworker.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,17 +50,33 @@
     />
   </head>
   <body>
-    <div class="dot-grid"></div>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="dot-grid" aria-hidden="true"></div>
+
+    <div class="boot-overlay" data-boot-overlay role="status" aria-live="polite">
+      <div class="boot-card">
+        <div class="boot-spinner" aria-hidden="true"></div>
+        <p class="boot-title">INITIALIZING FHE RUNTIME</p>
+        <p class="boot-detail" data-boot-detail>Loading TFHE-rs WebAssembly…</p>
+        <div class="boot-bar" aria-hidden="true"><div class="boot-bar-fill"></div></div>
+        <p class="boot-hint">
+          Generating your key pair in-browser (~10–15s). Your secret key never leaves this device.
+        </p>
+        <button class="action action-green boot-retry" data-boot-retry hidden>[ RETRY ]</button>
+      </div>
+    </div>
+
     <header class="app-header">
+      <h1 class="visually-hidden">Blind Oracle — Fully Homomorphic Encryption Demo</h1>
       <button class="theme-toggle" data-theme-toggle aria-label="Switch to light mode">🌙</button>
     </header>
-    <main class="app-grid">
-      <section class="zone zone-questioner">
-        <p class="zone-label zone-label-green">THE QUESTIONER</p>
+    <main class="app-grid" id="main-content">
+      <section class="zone zone-questioner" aria-labelledby="questioner-heading">
+        <h2 class="zone-label zone-label-green" id="questioner-heading">THE QUESTIONER</h2>
         <p class="zone-subtext zone-subtext-green">Your keys. Your values. Your world.</p>
 
-        <div class="explain-card" aria-label="How the demo works">
-          <p class="explain-title">HOW THIS DEMO WORKS</p>
+        <div class="explain-card">
+          <h3 class="explain-title">HOW THIS DEMO WORKS</h3>
           <ol class="explain-steps">
             <li>Your browser generates keys and encrypts your numbers.</li>
             <li>Only ciphertext is sent over the wire to the Oracle.</li>
@@ -42,10 +89,28 @@
         </div>
 
         <label class="field-label" for="value-a">SECRET VALUE A (0-255)</label>
-        <input id="value-a" data-input-a type="number" min="0" max="255" value="50" />
+        <input
+          id="value-a"
+          data-input-a
+          type="number"
+          inputmode="numeric"
+          autocomplete="off"
+          min="0"
+          max="255"
+          value="50"
+        />
 
         <label class="field-label" for="value-b">SECRET VALUE B (0-255)</label>
-        <input id="value-b" data-input-b type="number" min="0" max="255" value="50" />
+        <input
+          id="value-b"
+          data-input-b
+          type="number"
+          inputmode="numeric"
+          autocomplete="off"
+          min="0"
+          max="255"
+          value="50"
+        />
 
         <button class="action action-green" data-encrypt>[ ENCRYPT &amp; TRANSMIT ]</button>
 
@@ -55,39 +120,51 @@
         </div>
       </section>
 
-      <section class="zone zone-wire">
-        <p class="zone-label zone-label-wire">ENCRYPTED WIRE</p>
+      <section class="zone zone-wire" aria-labelledby="wire-heading">
+        <h2 class="zone-label zone-label-wire" id="wire-heading">ENCRYPTED WIRE</h2>
         <div class="scheme-badge">
           <span>TFHE-rs · Gate Bootstrapping · True FHE</span>
-          <button class="info-btn" data-open-info aria-label="What is Fully Homomorphic Encryption?">[?]</button>
+          <button
+            class="info-btn"
+            data-open-info
+            aria-label="What is Fully Homomorphic Encryption?"
+          >
+            [?]
+          </button>
         </div>
-        <canvas id="wire-canvas"></canvas>
+        <canvas id="wire-canvas" aria-hidden="true"></canvas>
         <div class="response-time">RESPONSE TIME: <span data-response-time>--ms</span></div>
         <div class="pulse pulse-top"></div>
         <div class="pulse pulse-bottom"></div>
       </section>
 
-      <section class="zone zone-oracle">
-        <p class="zone-label zone-label-orange">THE BLIND ORACLE</p>
+      <section class="zone zone-oracle" aria-labelledby="oracle-heading">
+        <h2 class="zone-label zone-label-orange" id="oracle-heading">THE BLIND ORACLE</h2>
         <p class="zone-subtext zone-subtext-orange">Evaluation key only. Cannot decrypt.</p>
 
         <div class="cipher-panel">
-          <p class="cipher-title">ct_a preview</p>
+          <h3 class="cipher-title">ct_a preview</h3>
           <p class="cipher-body" data-ct-a-preview>awaiting ciphertext A...</p>
         </div>
 
         <div class="cipher-panel">
-          <p class="cipher-title">ct_b preview</p>
+          <h3 class="cipher-title">ct_b preview</h3>
           <p class="cipher-body" data-ct-b-preview>awaiting ciphertext B...</p>
         </div>
 
         <button class="action action-orange" data-compute disabled>[ COMPUTE (FHE ADD) ]</button>
 
-        <div class="oracle-log" data-oracle-log></div>
+        <div
+          class="oracle-log"
+          data-oracle-log
+          role="log"
+          aria-live="polite"
+          aria-label="Oracle activity log"
+        ></div>
       </section>
     </main>
 
-    <aside class="result-bar" data-result-bar>
+    <aside class="result-bar" data-result-bar aria-live="polite">
       <div>
         <p class="result-label">THE ORACLE COMPUTED THIS WITHOUT EVER KNOWING EITHER VALUE.</p>
         <p class="result-value" data-result-value>0</p>
@@ -98,11 +175,11 @@
       </div>
     </aside>
 
-    <div class="system-status">STATE: <span data-state>BOOTING</span></div>
-    <p class="error" data-error hidden></p>
+    <div class="system-status" aria-live="polite">STATE: <span data-state>BOOTING</span></div>
+    <p class="error" data-error role="alert" hidden></p>
 
-    <dialog class="inspector-modal" data-inspector-modal>
-      <h2>WHAT THE ORACLE SAW</h2>
+    <dialog class="inspector-modal" data-inspector-modal aria-labelledby="inspector-title">
+      <h2 id="inspector-title">WHAT THE ORACLE SAW</h2>
       <p class="verdict">PLAINTEXT VALUES PROCESSED BY ORACLE: 0</p>
       <div class="modal-grid">
         <section>
@@ -121,12 +198,18 @@
       <button class="action action-orange" data-close-inspector>[ CLOSE ]</button>
     </dialog>
 
-    <dialog class="info-modal" data-info-modal>
-      <h2>What is Fully Homomorphic Encryption?</h2>
+    <dialog class="info-modal" data-info-modal aria-labelledby="info-title">
+      <h2 id="info-title">What is Fully Homomorphic Encryption?</h2>
       <div class="info-content">
         <p>FHE lets a server compute on your encrypted data without decrypting it.</p>
-        <p><strong>TFHE-rs</strong> uses gate bootstrapping — every operation automatically refreshes the noise budget, enabling unlimited computation depth.</p>
-        <p>There is no circuit depth limit. The server computes on your encrypted data without any ability to decrypt it.</p>
+        <p>
+          <strong>TFHE-rs</strong> uses gate bootstrapping — every operation automatically refreshes
+          the noise budget, enabling unlimited computation depth.
+        </p>
+        <p>
+          There is no circuit depth limit. The server computes on your encrypted data without any
+          ability to decrypt it.
+        </p>
         <p><em>This is the real thing.</em></p>
       </div>
       <button class="action action-green" data-close-info>[ CLOSE ]</button>
@@ -145,8 +228,9 @@
       </div>
     </details>
 
-    <footer style="text-align:center; padding: 1.5rem; font-size: 0.85rem; opacity: 0.7; margin-top: 2rem;">
-      Whether you eat or drink or whatever you do, do it all for the glory of God. — 1 Corinthians 10:31
+    <footer class="app-footer">
+      Whether you eat or drink or whatever you do, do it all for the glory of God. — 1 Corinthians
+      10:31
     </footer>
 
     <script type="module" src="/src/main.ts"></script>

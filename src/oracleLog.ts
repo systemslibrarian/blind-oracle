@@ -37,7 +37,7 @@ export class OracleLog {
   }
 
   logTransmit(ctA: string, ctB: string): void {
-    this.append(`[WIRE]   POST /compute/add - payload: ${ctA.slice(0, 48)}...`) 
+    this.append(`[WIRE]   POST /compute/add - payload: ${ctA.slice(0, 48)}...`)
     this.append(`[WIRE]   ct_a: ${ctA.slice(0, 12)}... ct_b: ${ctB.slice(0, 12)}...`)
     this.append('[WIRE]   Server key transmitted for evaluation.')
   }

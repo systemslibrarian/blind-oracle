@@ -1,0 +1,10 @@
+# Normalize line endings to LF on checkin for all text files.
+* text=auto eol=lf
+
+# Binary assets must never be altered.
+*.wasm binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
