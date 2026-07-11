@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg: #07070f;
   --green: #00ffcc;
   --green-soft: rgba(0, 255, 204, 0.35);
@@ -8,6 +9,7 @@
 }
 
 html[data-theme='light'] {
+  color-scheme: light;
   --bg: #f3fbf7;
   --green: #0d6f5e;
   --green-soft: rgba(13, 111, 94, 0.35);
@@ -24,7 +26,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--bg);
+  background-color: var(--bg);
   color: #e8f5f0;
 }
 
@@ -63,7 +65,7 @@ body {
   left: 8px;
   z-index: 300;
   padding: 10px 16px;
-  background: var(--green);
+  background-color: var(--green);
   color: #07070f;
   font-family: 'Orbitron', sans-serif;
   font-weight: 700;
@@ -77,12 +79,23 @@ body {
   transform: translateY(0);
 }
 
+html[data-theme='light'] .skip-link {
+  /* Near-black on the light theme's --green (#0d6f5e) is only 3.3:1;
+     near-white clears AA at 5.8:1. */
+  color: #f3fbf7;
+}
+
 .app-footer {
   text-align: center;
   padding: 1.5rem;
   font-size: 0.85rem;
-  opacity: 0.7;
   margin-top: 2rem;
+}
+
+/* Footer links pick up the theme accent; the UA default link blue fails
+   contrast on the dark canvas (~2.1:1). --green is 15.5:1 dark / 5.8:1 light. */
+.footer-links a {
+  color: var(--green);
 }
 
 .app-grid {
@@ -105,7 +118,7 @@ body {
   height: 44px;
   border-radius: 50%;
   border: 1px solid var(--green-soft);
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--green);
   font-size: 1.2rem;
   line-height: 1;
@@ -118,7 +131,7 @@ body {
 }
 
 .theme-toggle:hover {
-  background: var(--green-soft);
+  background-color: var(--green-soft);
   border-color: var(--green);
 }
 
@@ -128,7 +141,7 @@ html[data-theme='light'] .theme-toggle {
 }
 
 html[data-theme='light'] .theme-toggle:hover {
-  background: var(--orange-soft);
+  background-color: var(--orange-soft);
   border-color: var(--orange);
 }
 
@@ -213,7 +226,7 @@ html[data-theme='light'] .theme-toggle:hover {
 
 input[type='number'] {
   width: 100%;
-  background: rgba(0, 255, 204, 0.08);
+  background-color: rgba(0, 255, 204, 0.08);
   border: 2px solid var(--green-soft);
   color: var(--green);
   font-family: 'Share Tech Mono', monospace;
@@ -234,7 +247,7 @@ input[type='number']:focus {
   font-weight: 700;
   letter-spacing: 1.5px;
   padding: 14px 18px;
-  background: transparent;
+  background-color: transparent;
   cursor: pointer;
 }
 
@@ -271,7 +284,7 @@ input[type='number']:focus {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--green);
+  background-color: var(--green);
   box-shadow: 0 0 10px var(--green);
 }
 
@@ -296,7 +309,7 @@ input[type='number']:focus {
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  background: transparent;
+  background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: rgba(255, 255, 255, 0.7);
   font-family: 'Share Tech Mono', monospace;
@@ -358,7 +371,7 @@ input[type='number']:focus {
 
 .cipher-panel {
   border: 1px solid rgba(255, 107, 53, 0.22);
-  background: rgba(255, 107, 53, 0.04);
+  background-color: rgba(255, 107, 53, 0.04);
   padding: 10px;
 }
 
@@ -383,7 +396,7 @@ input[type='number']:focus {
   flex: 1;
   overflow-y: auto;
   border: 1px solid rgba(255, 123, 69, 0.35);
-  background: rgba(255, 123, 69, 0.06);
+  background-color: rgba(255, 123, 69, 0.06);
   padding: 12px;
 }
 
@@ -401,7 +414,7 @@ input[type='number']:focus {
   bottom: max(20px, env(safe-area-inset-bottom));
   z-index: 60;
   border: 1px solid rgba(0, 255, 179, 0.45);
-  background: rgba(7, 7, 15, 0.96);
+  background-color: rgba(7, 7, 15, 0.96);
   display: flex;
   justify-content: space-between;
   align-items: end;
@@ -443,7 +456,7 @@ input[type='number']:focus {
   top: 62px;
   right: 12px;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(12, 12, 18, 0.9);
+  background-color: rgba(12, 12, 18, 0.9);
   padding: 10px 14px;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
@@ -454,7 +467,7 @@ input[type='number']:focus {
   top: 102px;
   right: 12px;
   border: 1px solid rgba(255, 107, 53, 0.6);
-  background: rgba(255, 107, 53, 0.2);
+  background-color: rgba(255, 107, 53, 0.2);
   color: #ffe0d0;
   padding: 10px 14px;
   font-size: 14px;
@@ -464,13 +477,13 @@ input[type='number']:focus {
   width: min(1100px, 94vw);
   max-height: 90vh;
   overflow: auto;
-  background: #0f111a;
+  background-color: #0f111a;
   color: #f1f5f4;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .inspector-modal::backdrop {
-  background: rgba(4, 6, 12, 0.84);
+  background-color: rgba(4, 6, 12, 0.84);
 }
 
 .verdict {
@@ -587,14 +600,14 @@ input[type='number']:focus {
   width: min(600px, 90vw);
   max-height: 90vh;
   overflow: auto;
-  background: #0f111a;
+  background-color: #0f111a;
   color: #f1f5f4;
   border: 1px solid rgba(0, 255, 179, 0.3);
   padding: 20px;
 }
 
 .info-modal::backdrop {
-  background: rgba(4, 6, 12, 0.84);
+  background-color: rgba(4, 6, 12, 0.84);
 }
 
 .info-modal h2 {
@@ -629,7 +642,7 @@ input[type='number']:focus {
   left: 20px;
   right: 20px;
   bottom: 0;
-  background: rgba(12, 12, 18, 0.95);
+  background-color: rgba(12, 12, 18, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-bottom: none;
   font-size: 13px;
@@ -660,7 +673,7 @@ input[type='number']:focus {
 }
 
 .devtools-content code {
-  background: rgba(0, 255, 179, 0.1);
+  background-color: rgba(0, 255, 179, 0.1);
   padding: 2px 5px;
   color: var(--green);
 }
@@ -732,7 +745,7 @@ html[data-theme='light'] .field-label {
 }
 
 html[data-theme='light'] input[type='number'] {
-  background: rgba(13, 111, 94, 0.06);
+  background-color: rgba(13, 111, 94, 0.06);
 }
 
 html[data-theme='light'] input[type='number']:focus {
@@ -771,7 +784,7 @@ html[data-theme='light'] .pulse {
 
 html[data-theme='light'] .cipher-panel {
   border-color: rgba(191, 79, 32, 0.25);
-  background: rgba(191, 79, 32, 0.04);
+  background-color: rgba(191, 79, 32, 0.04);
 }
 
 html[data-theme='light'] .cipher-title {
@@ -785,7 +798,7 @@ html[data-theme='light'] .cipher-body {
 
 html[data-theme='light'] .oracle-log {
   border-color: rgba(191, 79, 32, 0.3);
-  background: rgba(191, 79, 32, 0.04);
+  background-color: rgba(191, 79, 32, 0.04);
 }
 
 html[data-theme='light'] .oracle-line {
@@ -794,7 +807,7 @@ html[data-theme='light'] .oracle-line {
 
 html[data-theme='light'] .result-bar {
   border-color: rgba(13, 111, 94, 0.4);
-  background: rgba(243, 251, 247, 0.96);
+  background-color: rgba(243, 251, 247, 0.96);
 }
 
 html[data-theme='light'] .result-label {
@@ -808,24 +821,24 @@ html[data-theme='light'] .action-ghost {
 
 html[data-theme='light'] .system-status {
   border-color: rgba(0, 0, 0, 0.2);
-  background: rgba(243, 251, 247, 0.92);
+  background-color: rgba(243, 251, 247, 0.92);
   color: rgba(0, 0, 0, 0.8);
 }
 
 html[data-theme='light'] .error {
   border-color: rgba(191, 79, 32, 0.5);
-  background: rgba(191, 79, 32, 0.1);
+  background-color: rgba(191, 79, 32, 0.1);
   color: #5a2010;
 }
 
 html[data-theme='light'] .inspector-modal {
-  background: #f3fbf7;
+  background-color: #f3fbf7;
   color: #1a2a24;
   border-color: rgba(0, 0, 0, 0.15);
 }
 
 html[data-theme='light'] .inspector-modal::backdrop {
-  background: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 html[data-theme='light'] .modal-grid pre {
@@ -833,13 +846,13 @@ html[data-theme='light'] .modal-grid pre {
 }
 
 html[data-theme='light'] .info-modal {
-  background: #f3fbf7;
+  background-color: #f3fbf7;
   color: #1a2a24;
   border-color: rgba(13, 111, 94, 0.3);
 }
 
 html[data-theme='light'] .info-modal::backdrop {
-  background: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 html[data-theme='light'] .info-content {
@@ -847,11 +860,12 @@ html[data-theme='light'] .info-content {
 }
 
 html[data-theme='light'] .info-content em {
-  color: rgba(13, 111, 94, 0.85);
+  /* Full-strength green: the 0.85-alpha tint was 4.3:1 on #f3fbf7. */
+  color: #0d6f5e;
 }
 
 html[data-theme='light'] .devtools-panel {
-  background: rgba(243, 251, 247, 0.95);
+  background-color: rgba(243, 251, 247, 0.95);
   border-color: rgba(0, 0, 0, 0.15);
   color: rgba(0, 0, 0, 0.6);
 }
@@ -861,7 +875,7 @@ html[data-theme='light'] .devtools-content {
 }
 
 html[data-theme='light'] .devtools-content code {
-  background: rgba(13, 111, 94, 0.08);
+  background-color: rgba(13, 111, 94, 0.08);
 }
 
 html[data-theme='light'] .last-request {
@@ -893,7 +907,7 @@ html[data-theme='light'] .last-request pre {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(7, 7, 15, 0.92);
+  background-color: rgba(7, 7, 15, 0.92);
   backdrop-filter: blur(4px);
   transition:
     opacity 0.4s ease,
@@ -901,7 +915,7 @@ html[data-theme='light'] .last-request pre {
 }
 
 html[data-theme='light'] .boot-overlay {
-  background: rgba(243, 251, 247, 0.94);
+  background-color: rgba(243, 251, 247, 0.94);
 }
 
 .boot-overlay--hidden {
@@ -972,7 +986,7 @@ html[data-theme='light'] .boot-detail {
   height: 4px;
   width: 100%;
   overflow: hidden;
-  background: rgba(0, 255, 179, 0.12);
+  background-color: rgba(0, 255, 179, 0.12);
   margin-bottom: 18px;
 }
 
@@ -983,7 +997,7 @@ html[data-theme='light'] .boot-detail {
 .boot-bar-fill {
   height: 100%;
   width: 40%;
-  background: var(--green);
+  background-color: var(--green);
   animation: boot-slide 1.4s ease-in-out infinite;
 }
 
@@ -1004,7 +1018,8 @@ html[data-theme='light'] .boot-detail {
 }
 
 html[data-theme='light'] .boot-hint {
-  color: rgba(13, 111, 94, 0.8);
+  /* Full-strength green: the 0.8-alpha tint was 3.9:1 on the light overlay. */
+  color: #0d6f5e;
 }
 
 .boot-retry {
