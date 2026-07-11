@@ -11,6 +11,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:a11y": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "deploy": "npm run build && gh-pages -d dist"
@@ -19,6 +20,8 @@
     "tfhe": "^0.8.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
     "coi-serviceworker": "^0.1.7",
     "gh-pages": "^6.3.0",
     "prettier": "^3.8.4",
