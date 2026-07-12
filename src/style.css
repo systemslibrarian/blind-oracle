@@ -1145,7 +1145,7 @@ html[data-theme='light'] .op-why {
 .wire-schematic {
   position: relative;
   flex: 1;
-  min-height: 320px;
+  min-height: 190px;
   display: flex;
   border: 1px solid rgba(127, 127, 127, 0.25);
   border-radius: 4px;
@@ -1210,13 +1210,14 @@ html[data-theme='light'] .wire-chip-absent {
   position: relative;
   flex: 1;
   margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 8px 10px;
 }
 
 .wire-token {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 0;
   font-size: 12px;
   letter-spacing: 1px;
   padding: 3px 9px;
@@ -1224,7 +1225,6 @@ html[data-theme='light'] .wire-chip-absent {
   border: 1px solid var(--orange-soft);
   color: var(--orange);
   background-color: rgba(255, 123, 69, 0.12);
-  opacity: 0;
 }
 
 .wire-token-result {
