@@ -65,7 +65,6 @@ const modalCtA = document.querySelector('[data-modal-ct-a]') as HTMLElement
 const modalCtB = document.querySelector('[data-modal-ct-b]') as HTMLElement
 const modalCtR = document.querySelector('[data-modal-ct-r]') as HTMLElement
 const resetBtn = document.querySelector('[data-reset]') as HTMLButtonElement
-const wireCanvas = document.querySelector('#wire-canvas') as HTMLCanvasElement
 const infoModal = document.querySelector('[data-info-modal]') as HTMLDialogElement
 const infoOpenBtn = document.querySelector('[data-open-info]') as HTMLButtonElement
 const infoCloseBtn = document.querySelector('[data-close-info]') as HTMLButtonElement
@@ -77,7 +76,7 @@ const bootDetailEl = document.querySelector('[data-boot-detail]') as HTMLElement
 const bootRetryBtn = document.querySelector('[data-boot-retry]') as HTMLButtonElement
 
 const oracleLog = new OracleLog(logEl)
-const animator = new WireAnimator(wireCanvas)
+const animator = new WireAnimator()
 animator.start()
 
 function getCurrentTheme(): 'dark' | 'light' {

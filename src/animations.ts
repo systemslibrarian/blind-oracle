@@ -6,67 +6,20 @@ function prefersReducedMotion(): boolean {
   )
 }
 
+/**
+ * Drives the labelled-token flow across the client -> oracle wire schematic.
+ * The schematic is a STATIC diagram at rest; motion happens only when a real
+ * homomorphic round-trip fires (triggerTransmission), so nothing loops idle.
+ */
 export class WireAnimator {
-  private canvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
-  private width = 0
-  private height = 0
-  private drops: number[] = []
-  private running = false
-  private burstUntil = 0
-  // The schematic container carries the labelled-token flow (DOM/CSS driven).
-  // The canvas is now a faint DIRECTIONAL backdrop (top→bottom = client→oracle),
-  // reinforcing the trust boundary instead of being decorative rain.
   private schematic: HTMLElement | null
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas
+  constructor() {
     this.schematic = document.querySelector('[data-wire-schematic]')
-    const context = canvas.getContext('2d')
-    if (!context) {
-      throw new Error('2D canvas context unavailable')
-    }
-    this.ctx = context
-    this.resize()
-    window.addEventListener('resize', () => this.resize())
   }
 
-  private resize(): void {
-    this.width = this.canvas.clientWidth
-    this.height = this.canvas.clientHeight
-    this.canvas.width = Math.max(1, this.width * window.devicePixelRatio)
-    this.canvas.height = Math.max(1, this.height * window.devicePixelRatio)
-    this.ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0)
-
-    const columns = Math.floor(this.width / 18)
-    this.drops = Array.from({ length: columns }, () => Math.random() * this.height)
-
-    // Under reduced motion there is no animation loop, so repaint a static
-    // frame here to avoid a blank canvas after a viewport resize.
-    if (!this.running && prefersReducedMotion()) {
-      this.drawFrame()
-    }
-  }
-
-  start(): void {
-    if (this.running) {
-      return
-    }
-    // Honour reduced-motion: paint one static frame instead of a running loop.
-    if (prefersReducedMotion()) {
-      this.drawFrame()
-      return
-    }
-    this.running = true
-    const tick = () => {
-      if (!this.running) {
-        return
-      }
-      this.drawFrame()
-      requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  }
+  /** Retained no-op: the wire has no idle animation loop to start. */
+  start(): void {}
 
   /**
    * Kick off the labelled-token flow across the wire.
@@ -74,13 +27,12 @@ export class WireAnimator {
    *   Oracle; 'return' = ct_result coming back. The secret-key chip never moves.
    */
   triggerTransmission(direction: 'out' | 'return' = 'out'): void {
-    this.burstUntil = performance.now() + 1200
     const el = this.schematic
-    if (!el) {
+    if (!el || prefersReducedMotion()) {
       return
     }
     // Restart the CSS animation reliably by toggling the class off, forcing a
-    // reflow, then on again — so repeated compute clicks re-run the flow.
+    // reflow, then on again -- so repeated compute clicks re-run the flow.
     el.classList.remove('wire-flow-out', 'wire-flow-return')
     void el.offsetWidth
     el.classList.add(direction === 'return' ? 'wire-flow-return' : 'wire-flow-out')
@@ -89,30 +41,6 @@ export class WireAnimator {
   /** Clear any in-progress flow markers (used on reset). */
   clearTransmission(): void {
     this.schematic?.classList.remove('wire-flow-out', 'wire-flow-return')
-  }
-
-  private drawFrame(): void {
-    this.ctx.fillStyle = 'rgba(7, 7, 15, 0.16)'
-    this.ctx.fillRect(0, 0, this.width, this.height)
-
-    this.ctx.font = '13px "Share Tech Mono"'
-    const now = performance.now()
-    const burst = now < this.burstUntil
-    // Faint backdrop; the meaningful labelled tokens live in the DOM overlay.
-    // During a burst the flow brightens/quickens to signal payload movement,
-    // but it always moves top→bottom (client→oracle), never random rain.
-    const color = burst ? 'rgba(255,122,69,0.55)' : 'rgba(0,255,179,0.28)'
-    this.ctx.fillStyle = color
-
-    for (let i = 0; i < this.drops.length; i += 1) {
-      const x = i * 18
-      const y = this.drops[i]
-      const glyph = Math.floor(Math.random() * 16)
-        .toString(16)
-        .toUpperCase()
-      this.ctx.fillText(glyph, x, y)
-      this.drops[i] = y > this.height + 20 ? 0 : y + (burst ? 7 : 3)
-    }
   }
 }
 

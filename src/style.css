@@ -1145,13 +1145,11 @@ html[data-theme='light'] .op-why {
 .wire-schematic {
   position: relative;
   flex: 1;
-  min-height: 300px;
+  min-height: 320px;
   display: flex;
-}
-
-.wire-schematic #wire-canvas {
-  flex: 1;
-  min-height: 0;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(0, 255, 179, 0.03), rgba(255, 107, 53, 0.03));
 }
 
 .wire-overlay {
