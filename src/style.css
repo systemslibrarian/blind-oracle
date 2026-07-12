@@ -1430,17 +1430,16 @@ html[data-theme='light'] .noise-bar {
 .noise-fill {
   width: 100%;
   background: linear-gradient(180deg, var(--orange), rgba(255, 123, 69, 0.2));
-  height: 20%;
+  height: 30%;
   transform-origin: bottom;
-  animation: noise-cycle 3.6s ease-in-out infinite;
 }
 
 .noise-fill-2 {
-  animation-delay: 1.2s;
+  height: 55%;
 }
 
 .noise-fill-3 {
-  animation-delay: 2.4s;
+  height: 80%;
 }
 
 @keyframes noise-cycle {
