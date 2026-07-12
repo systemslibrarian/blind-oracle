@@ -4,6 +4,8 @@
 
 Blind Oracle is a browser-to-server demonstration of **Fully Homomorphic Encryption** using [TFHE-rs](https://github.com/zama-ai/tfhe-rs) and gate bootstrapping over encrypted `FheUint8` values. The client encrypts two inputs, the server performs homomorphic addition, and the client decrypts the encrypted result locally. This solves the problem of outsourcing computation while keeping plaintext hidden from the compute provider. The security model is asymmetric homomorphic encryption (public evaluation key on the server, secret decryption key kept client-side), with post-quantum lattice-based foundations through TFHE.
 
+Beyond the "the server literally cannot read this" reveal, the demo now makes the _mechanism_ visible: a side-by-side **plaintext world vs ciphertext world** panel runs both computations at once so the homomorphic correspondence `Enc(a) ⊞ Enc(b) → decrypt = a + b` is shown rather than asserted; **value-dependent ciphertext fingerprints** plus a **Re-encrypt same values** control demonstrate that TFHE encryption is probabilistic (same number, different ciphertext, still-correct sum); a **schematic wire** animates the actual payloads (`ct_a`, `ct_b`, `serverKey`, `ct_result`) crossing the trust boundary while the secret key stays pinned client-side; and a short **gate-bootstrapping / noise-budget** explainer plus an honest cost framing replace the earlier "unlimited computation depth" over-claim.
+
 ## When to Use It
 
 - Use it when you must run arithmetic on sensitive values in an untrusted cloud because TFHE-rs lets the server compute directly on ciphertexts.
@@ -16,7 +18,7 @@ Blind Oracle is a browser-to-server demonstration of **Fully Homomorphic Encrypt
 
 **[systemslibrarian.github.io/crypto-lab-blind-oracle](https://systemslibrarian.github.io/crypto-lab-blind-oracle/)**
 
-Watch a server add two numbers it can never read: the math happens on ciphertext, and only your browser holds the key to decrypt the answer. Enter two secret values in the 0–255 range, encrypt and transmit them, and trigger homomorphic addition on the oracle. The UI shows ciphertext previews, response time, the oracle log, and a modal showing exactly what the oracle received — without plaintext access. Controls: **SECRET VALUE A**, **SECRET VALUE B**, **ENCRYPT & TRANSMIT**, **COMPUTE (FHE ADD)**, **WHAT THE ORACLE SAW**, and **RESET**.
+Watch a server add two numbers it can never read: the math happens on ciphertext, and only your browser holds the key to decrypt the answer. Enter two secret values in the 0–255 range, encrypt and transmit them, and trigger homomorphic addition on the oracle. The UI shows ciphertext previews with value-dependent fingerprints, a schematic of the payloads crossing the wire, the parallel plaintext-vs-ciphertext tracks that fill in as you compute, a gate-bootstrapping/noise explainer, response time (the price of one homomorphic add), the oracle log, and a modal showing exactly what the oracle received — without plaintext access. Controls: **SECRET VALUE A**, **SECRET VALUE B**, **ENCRYPT & TRANSMIT**, **RE-ENCRYPT SAME VALUES** (fresh randomness, different ciphertext), **COMPUTE (FHE ADD)**, **MULTIPLY — WHY SLOWER?** (explains the operation/cost tradeoff), **WHAT THE ORACLE SAW**, and **RESET**.
 
 > First load generates an FHE key pair in your browser (~10–15s) — a boot overlay shows progress. On the free-tier backend, the oracle may also take a moment to wake from cold start.
 
@@ -74,15 +76,15 @@ In development, `/api` is proxied to the hosted backend via Vite (see `vite.conf
 
 ### Source layout
 
-| File                  | Responsibility                                                      |
-| --------------------- | ------------------------------------------------------------------- |
-| `src/main.ts`         | UI wiring, app state transitions, boot overlay, event handlers      |
-| `src/clientFhe.ts`    | TFHE-rs WASM: key generation, encryption, decryption                |
-| `src/apiClient.ts`    | Typed fetch client for the oracle, with timeouts and error taxonomy |
-| `src/encoding.ts`     | Pure base64/hex helpers and FheUint8 range validation (unit-tested) |
-| `src/stateMachine.ts` | Minimal observable state machine driving the UI (unit-tested)       |
-| `src/animations.ts`   | Canvas "wire" effect and count-up, both reduced-motion aware        |
-| `src/oracleLog.ts`    | Append-only activity log rendering                                  |
+| File                  | Responsibility                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/main.ts`         | UI wiring, app state transitions, boot overlay, event handlers                                                                                                |
+| `src/clientFhe.ts`    | TFHE-rs WASM: key generation, encryption, decryption                                                                                                          |
+| `src/apiClient.ts`    | Typed fetch client for the oracle, with timeouts and error taxonomy                                                                                           |
+| `src/encoding.ts`     | Pure base64/hex helpers, FheUint8 range validation, and a non-cryptographic ciphertext fingerprint used only to render value-dependent swatches (unit-tested) |
+| `src/stateMachine.ts` | Minimal observable state machine driving the UI (unit-tested)                                                                                                 |
+| `src/animations.ts`   | Canvas "wire" effect and count-up, both reduced-motion aware                                                                                                  |
+| `src/oracleLog.ts`    | Append-only activity log rendering                                                                                                                            |
 
 ## Scripts
 
@@ -115,6 +117,6 @@ TypeScript · Vite · [TFHE-rs](https://github.com/zama-ai/tfhe-rs) (Zama) WebAs
 
 ---
 
-*One of 120+ browser demos in the [Crypto Lab](https://crypto-lab.systemslibrarian.dev/) suite.*
+_One of 120+ browser demos in the [Crypto Lab](https://crypto-lab.systemslibrarian.dev/) suite._
 
-*"So whether you eat or drink or whatever you do, do it all for the glory of God." — 1 Corinthians 10:31*
+_"So whether you eat or drink or whatever you do, do it all for the glory of God." — 1 Corinthians 10:31_

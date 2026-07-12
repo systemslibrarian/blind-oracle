@@ -50,123 +50,248 @@
     />
   </head>
   <body>
-<!-- BEGIN crypto-lab shared header — managed; edit shared-header.html + re-run reapply-header.py
+    <!-- BEGIN crypto-lab shared header — managed; edit shared-header.html + re-run reapply-header.py
      Identical on every lab. Self-contained styles. Accents use each demo's own
      --accent CSS variable (teal #35d6bb fallback). The ONLY per-repo value is the
      repo name (crypto-lab-blind-oracle) in the GitHub link.
      Source of truth: github.com/systemslibrarian/crypto-lab/shared-header.html -->
-<style>
-  .cl-topbar{
-    /* The bar is always dark (#0b1512) regardless of page theme, so header
+    <style>
+      .cl-topbar {
+        /* The bar is always dark (#0b1512) regardless of page theme, so header
        text must always be light. Mix each lab's --accent toward near-white so
        the hue still tints the brand but contrast stays >=4.5:1 on the bar even
        when a lab's accent is dark (e.g. a light-theme #1a56db). */
-    --cl-ink: color-mix(in srgb, var(--accent, #35d6bb) 60%, #eafff8);
-    display:flex;align-items:center;justify-content:space-between;gap:1rem;
-    padding:.7rem clamp(.9rem,3vw,2rem);
-    background:#0b1512;
-    border-bottom:1px solid color-mix(in srgb, var(--accent, #35d6bb) 22%, transparent);
-    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
-    position:sticky;top:0;z-index:1000;
-  }
-  .cl-brand{display:flex;align-items:center;gap:.8rem;text-decoration:none}
-  .cl-badge{
-    flex:0 0 auto;display:grid;place-items:center;width:40px;height:40px;
-    border:1.5px solid var(--accent, #35d6bb);border-radius:10px;
-    color:var(--cl-ink);font-weight:700;font-size:.95rem;letter-spacing:.05em;
-  }
-  .cl-brand-text{display:flex;flex-direction:column;line-height:1.15}
-  .cl-title{color:#eafff8;font-weight:700;font-size:1.05rem;letter-spacing:.12em}
-  .cl-sub{color:#5e8b80;font-size:.72rem;letter-spacing:.04em}
-  .cl-actions{display:flex;align-items:center;gap:.5rem}
-  .cl-btn{
-    display:inline-flex;align-items:center;gap:.4rem;
-    padding:.5rem .85rem;border-radius:10px;
-    border:1px solid color-mix(in srgb, var(--accent, #35d6bb) 38%, transparent);
-    background:transparent;color:var(--cl-ink);cursor:pointer;
-    font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.1em;
-    text-transform:uppercase;text-decoration:none;transition:background .15s,border-color .15s,color .15s;
-  }
-  .cl-btn:hover{
-    background:color-mix(in srgb, var(--accent, #35d6bb) 14%, transparent);
-    border-color:var(--accent, #35d6bb);color:#eafff8;
-  }
-  .cl-btn svg{width:15px;height:15px}
-  .cl-icon{padding:.5rem .6rem;font-size:.95rem}
-  /* Skip-to-content link: first focusable element so keyboard users can bypass
+        --cl-ink: color-mix(in srgb, var(--accent, #35d6bb) 60%, #eafff8);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.7rem clamp(0.9rem, 3vw, 2rem);
+        background: #0b1512;
+        border-bottom: 1px solid color-mix(in srgb, var(--accent, #35d6bb) 22%, transparent);
+        font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      .cl-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        text-decoration: none;
+      }
+      .cl-badge {
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border: 1.5px solid var(--accent, #35d6bb);
+        border-radius: 10px;
+        color: var(--cl-ink);
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: 0.05em;
+      }
+      .cl-brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+      }
+      .cl-title {
+        color: #eafff8;
+        font-weight: 700;
+        font-size: 1.05rem;
+        letter-spacing: 0.12em;
+      }
+      .cl-sub {
+        color: #5e8b80;
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+      }
+      .cl-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .cl-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.85rem;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, var(--accent, #35d6bb) 38%, transparent);
+        background: transparent;
+        color: var(--cl-ink);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition:
+          background 0.15s,
+          border-color 0.15s,
+          color 0.15s;
+      }
+      .cl-btn:hover {
+        background: color-mix(in srgb, var(--accent, #35d6bb) 14%, transparent);
+        border-color: var(--accent, #35d6bb);
+        color: #eafff8;
+      }
+      .cl-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+      .cl-icon {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.95rem;
+      }
+      /* Skip-to-content link: first focusable element so keyboard users can bypass
      this sticky header (WCAG 2.4.1). Hidden until focused. Fixed light-on-dark
      pair (not --accent, which can be a dark hue on some labs) keeps contrast AA. */
-  .cl-skip-link{
-    position:absolute;left:.5rem;top:-3rem;z-index:1001;
-    padding:.55rem 1rem;border-radius:0 0 10px 10px;
-    background:#eafff8;color:#0b1512;
-    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
-    font-weight:700;font-size:.8rem;letter-spacing:.04em;text-decoration:none;
-    transition:top .15s ease;
-  }
-  .cl-skip-link:focus{top:0;outline:2px solid var(--accent,#35d6bb);outline-offset:2px;}
-  /* hide each lab's own in-page theme toggle — the bar's toggle replaces it.
+      .cl-skip-link {
+        position: absolute;
+        left: 0.5rem;
+        top: -3rem;
+        z-index: 1001;
+        padding: 0.55rem 1rem;
+        border-radius: 0 0 10px 10px;
+        background: #eafff8;
+        color: #0b1512;
+        font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        transition: top 0.15s ease;
+      }
+      .cl-skip-link:focus {
+        top: 0;
+        outline: 2px solid var(--accent, #35d6bb);
+        outline-offset: 2px;
+      }
+      /* hide each lab's own in-page theme toggle — the bar's toggle replaces it.
      element stays in the DOM so the lab's theme JS keeps working. */
-  body :is(#theme-toggle,#themeToggle,.theme-toggle,.theme-toggle-btn,[data-theme-toggle]):not(#cl-theme-toggle){display:none!important}
-  @media(max-width:560px){
-    .cl-sub{display:none}
-    .cl-btn span{display:none}
-    .cl-btn svg{margin:0}
-  }
-</style>
-<a class="cl-skip-link" href="#app">Skip to content</a>
-<header class="cl-topbar" role="banner" aria-label="Crypto Lab">
-  <a class="cl-brand" href="https://crypto-lab.systemslibrarian.dev/" aria-label="Crypto Lab home">
-    <span class="cl-badge">CL</span>
-    <span class="cl-brand-text">
-      <span class="cl-title">CRYPTO LAB</span>
-      <span class="cl-sub">systemslibrarian.dev</span>
-    </span>
-  </a>
-  <nav class="cl-actions" aria-label="Crypto Lab navigation">
-    <a class="cl-btn" href="https://crypto-lab.systemslibrarian.dev/" aria-label="Crypto Lab menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      <span>Menu</span>
-    </a>
-    <a class="cl-btn" href="https://github.com/systemslibrarian/crypto-lab-blind-oracle" target="_blank" rel="noopener" aria-label="View this project on GitHub">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7 0-.7 0-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 5 18.3 5.3 18.3 5.3c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
-      <span>GitHub</span>
-    </a>
-    <button class="cl-btn cl-icon" id="cl-theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle theme">☀</button>
-  </nav>
-</header>
-<script>
-  (function () {
-    var t = document.getElementById('cl-theme-toggle');
-    if (t) {
-      var cur = function(){ return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; };
-      var paint = function(){ t.textContent = cur() === 'light' ? '☾' : '☀'; };
-      paint();
-      t.addEventListener('click', function () {
-        var next = cur() === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        try { localStorage.setItem('theme', next); } catch (e) {}
-        paint();
-      });
-    }
-    // A page may have only one banner landmark. This shared site header is it;
-    // demote any banner a lab also declared on its own page header (explicit
-    // role="banner", or an implicit <header> child of <body>) so landmarks stay unique.
-    function dedupeBanner() {
-      var bar = document.querySelector('.cl-topbar');
-      if (!bar) return;
-      document.querySelectorAll('[role="banner"]').forEach(function (el) {
-        if (el !== bar) el.setAttribute('role', 'group');
-      });
-      Array.prototype.forEach.call(document.body ? document.body.children : [], function (el) {
-        if (el.tagName === 'HEADER' && el !== bar && !el.hasAttribute('role')) el.setAttribute('role', 'group');
-      });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dedupeBanner);
-    else dedupeBanner();
-  })();
-</script>
-<!-- END crypto-lab shared header -->
+      body
+        :is(#theme-toggle, #themeToggle, .theme-toggle, .theme-toggle-btn, [data-theme-toggle]):not(
+          #cl-theme-toggle
+        ) {
+        display: none !important;
+      }
+      @media (max-width: 560px) {
+        .cl-sub {
+          display: none;
+        }
+        .cl-btn span {
+          display: none;
+        }
+        .cl-btn svg {
+          margin: 0;
+        }
+      }
+    </style>
+    <a class="cl-skip-link" href="#app">Skip to content</a>
+    <header class="cl-topbar" role="banner" aria-label="Crypto Lab">
+      <a
+        class="cl-brand"
+        href="https://crypto-lab.systemslibrarian.dev/"
+        aria-label="Crypto Lab home"
+      >
+        <span class="cl-badge">CL</span>
+        <span class="cl-brand-text">
+          <span class="cl-title">CRYPTO LAB</span>
+          <span class="cl-sub">systemslibrarian.dev</span>
+        </span>
+      </a>
+      <nav class="cl-actions" aria-label="Crypto Lab navigation">
+        <a
+          class="cl-btn"
+          href="https://crypto-lab.systemslibrarian.dev/"
+          aria-label="Crypto Lab menu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+          <span>Menu</span>
+        </a>
+        <a
+          class="cl-btn"
+          href="https://github.com/systemslibrarian/crypto-lab-blind-oracle"
+          target="_blank"
+          rel="noopener"
+          aria-label="View this project on GitHub"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7 0-.7 0-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 5 18.3 5.3 18.3 5.3c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"
+            />
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <button
+          class="cl-btn cl-icon"
+          id="cl-theme-toggle"
+          type="button"
+          aria-label="Toggle color theme"
+          title="Toggle theme"
+        >
+          ☀
+        </button>
+      </nav>
+    </header>
+    <script>
+      ;(function () {
+        var t = document.getElementById('cl-theme-toggle')
+        if (t) {
+          var cur = function () {
+            return document.documentElement.getAttribute('data-theme') === 'light'
+              ? 'light'
+              : 'dark'
+          }
+          var paint = function () {
+            t.textContent = cur() === 'light' ? '☾' : '☀'
+          }
+          paint()
+          t.addEventListener('click', function () {
+            var next = cur() === 'light' ? 'dark' : 'light'
+            document.documentElement.setAttribute('data-theme', next)
+            try {
+              localStorage.setItem('theme', next)
+            } catch (e) {}
+            paint()
+          })
+        }
+        // A page may have only one banner landmark. This shared site header is it;
+        // demote any banner a lab also declared on its own page header (explicit
+        // role="banner", or an implicit <header> child of <body>) so landmarks stay unique.
+        function dedupeBanner() {
+          var bar = document.querySelector('.cl-topbar')
+          if (!bar) return
+          document.querySelectorAll('[role="banner"]').forEach(function (el) {
+            if (el !== bar) el.setAttribute('role', 'group')
+          })
+          Array.prototype.forEach.call(document.body ? document.body.children : [], function (el) {
+            if (el.tagName === 'HEADER' && el !== bar && !el.hasAttribute('role'))
+              el.setAttribute('role', 'group')
+          })
+        }
+        if (document.readyState === 'loading')
+          document.addEventListener('DOMContentLoaded', dedupeBanner)
+        else dedupeBanner()
+      })()
+    </script>
+    <!-- END crypto-lab shared header -->
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="dot-grid" aria-hidden="true"></div>
 
@@ -201,7 +326,9 @@
             <li>Your browser decrypts locally and reveals the sum.</li>
           </ol>
           <p class="explain-note">
-            This is Fully Homomorphic Encryption (TFHE-rs, gate bootstrapping).
+            This is Fully Homomorphic Encryption (TFHE-rs, gate bootstrapping). The &ldquo;plaintext
+            world vs ciphertext world&rdquo; panel below shows <em>why</em> the encrypted result
+            decrypts to the right answer.
           </p>
         </div>
 
@@ -232,6 +359,13 @@
         />
 
         <button class="action action-green" data-encrypt>[ ENCRYPT &amp; TRANSMIT ]</button>
+        <button class="action action-green action-ghost-green" data-reencrypt disabled>
+          [ RE-ENCRYPT SAME VALUES ]
+        </button>
+        <p class="reencrypt-note">
+          Same numbers, fresh randomness → different ciphertext bytes every time. Watch the
+          fingerprints on the Oracle side change.
+        </p>
 
         <div class="key-status">
           <span class="dot"></span>
@@ -251,8 +385,64 @@
             [?]
           </button>
         </div>
-        <canvas id="wire-canvas" aria-hidden="true"></canvas>
-        <div class="response-time">RESPONSE TIME: <span data-response-time>--ms</span></div>
+        <div class="wire-schematic" data-wire-schematic>
+          <canvas id="wire-canvas" aria-hidden="true"></canvas>
+          <div class="wire-overlay" aria-hidden="true">
+            <div class="wire-end wire-end-client">
+              <span class="wire-end-label">YOUR BROWSER</span>
+              <span class="wire-chip wire-chip-key" data-chip-key>secret key ●</span>
+            </div>
+
+            <div class="wire-lane">
+              <span class="wire-token wire-token-a" data-token-a>ct_a</span>
+              <span class="wire-token wire-token-b" data-token-b>ct_b</span>
+              <span class="wire-token wire-token-key" data-token-serverkey>serverKey</span>
+              <span class="wire-token wire-token-result" data-token-result>ct_result</span>
+            </div>
+
+            <div class="wire-end wire-end-oracle">
+              <span class="wire-end-label">THE ORACLE</span>
+              <span class="wire-op-box" data-op-box>⊞</span>
+              <span class="wire-chip wire-chip-key wire-chip-absent" data-chip-key-absent
+                >secret key ✕</span
+              >
+            </div>
+          </div>
+        </div>
+        <p class="wire-caption">
+          The secret key stays pinned in your browser. Only ct_a, ct_b and the (non-decrypting)
+          serverKey travel out; ct_result travels back.
+        </p>
+        <div class="response-time">
+          RESPONSE TIME: <span data-response-time>--ms</span>
+          <span class="response-cost" data-response-cost hidden
+            >← the price of one homomorphic add</span
+          >
+        </div>
+
+        <div class="noise-explainer">
+          <h3 class="noise-title">GATE BOOTSTRAPPING &amp; THE NOISE BUDGET</h3>
+          <p class="noise-text">
+            Every TFHE ciphertext hides its value under random <em>noise</em>. Each operation grows
+            that noise; too much and decryption fails. <strong>Gate bootstrapping</strong> resets
+            the noise after every gate so you can keep computing — but each reset is expensive,
+            which is why real FHE programs stay small.
+          </p>
+          <div
+            class="noise-diagram"
+            role="img"
+            aria-label="Noise rises during an operation, then bootstrapping resets it to a safe low level, repeatedly."
+          >
+            <div class="noise-bar"><span class="noise-fill noise-fill-1"></span></div>
+            <div class="noise-bar"><span class="noise-fill noise-fill-2"></span></div>
+            <div class="noise-bar"><span class="noise-fill noise-fill-3"></span></div>
+            <span class="noise-ceiling">noise ceiling (decrypt fails above)</span>
+          </div>
+          <p class="noise-legend">
+            rise = operation adds noise · drop = bootstrapping refreshes it
+          </p>
+        </div>
+
         <div class="pulse pulse-top"></div>
         <div class="pulse pulse-bottom"></div>
       </section>
@@ -263,15 +453,45 @@
 
         <div class="cipher-panel">
           <h3 class="cipher-title">ct_a preview</h3>
+          <div class="cipher-fingerprint">
+            <span class="swatch" data-ct-a-swatch aria-hidden="true"></span>
+            <span class="swatch-digest" data-ct-a-digest>—</span>
+          </div>
           <p class="cipher-body" data-ct-a-preview>awaiting ciphertext A...</p>
         </div>
 
         <div class="cipher-panel">
           <h3 class="cipher-title">ct_b preview</h3>
+          <div class="cipher-fingerprint">
+            <span class="swatch" data-ct-b-swatch aria-hidden="true"></span>
+            <span class="swatch-digest" data-ct-b-digest>—</span>
+          </div>
           <p class="cipher-body" data-ct-b-preview>awaiting ciphertext B...</p>
         </div>
 
-        <button class="action action-orange" data-compute disabled>[ COMPUTE (FHE ADD) ]</button>
+        <p class="fingerprint-note" data-fingerprint-note hidden>
+          The swatch and digest are a fingerprint of the actual ciphertext bytes. Encryption is
+          probabilistic: re-encrypt the same number and this fingerprint changes — yet the Oracle
+          still adds the two ciphertexts to the correct sum.
+        </p>
+
+        <div class="op-buttons">
+          <button class="action action-orange" data-compute disabled>[ COMPUTE (FHE ADD) ]</button>
+          <button
+            class="action action-orange action-disabled-teaching"
+            data-multiply-info
+            type="button"
+            aria-describedby="multiply-why"
+          >
+            [ MULTIPLY — WHY SLOWER? ]
+          </button>
+          <p id="multiply-why" class="op-why" data-multiply-why hidden>
+            FheUint8 multiply is offered by TFHE-rs too, but each multiply triggers many more gate
+            bootstraps than an add, so it is far slower and heavier — this demo ships add only to
+            keep the round-trip snappy. Homomorphism is general; the cost is what varies per
+            operation.
+          </p>
+        </div>
 
         <div
           class="oracle-log"
@@ -280,6 +500,54 @@
           aria-live="polite"
           aria-label="Oracle activity log"
         ></div>
+      </section>
+
+      <section class="zone zone-correspondence" aria-labelledby="corr-heading">
+        <h2 class="zone-label zone-label-wire" id="corr-heading">
+          PLAINTEXT WORLD vs CIPHERTEXT WORLD
+        </h2>
+        <p class="corr-intro">
+          Homomorphism means the same computation runs in both worlds and the answers match:
+          <strong>Enc(a) ⊞ Enc(b) decrypts to a + b</strong>. Encrypt and compute above, then watch
+          both tracks fill in.
+        </p>
+        <div class="corr-tracks">
+          <div class="corr-track corr-track-plain">
+            <h3 class="corr-track-title">PLAINTEXT (what you know)</h3>
+            <div class="corr-row">
+              <span class="corr-cell" data-corr-plain-a>a = ?</span>
+              <span class="corr-op">+</span>
+              <span class="corr-cell" data-corr-plain-b>b = ?</span>
+              <span class="corr-op">=</span>
+              <span class="corr-cell corr-cell-result" data-corr-plain-sum>?</span>
+            </div>
+          </div>
+
+          <div class="corr-link" aria-hidden="true">
+            <span class="corr-link-line"></span>
+            <span class="corr-link-label">same answer</span>
+            <span class="corr-link-line"></span>
+          </div>
+
+          <div class="corr-track corr-track-cipher">
+            <h3 class="corr-track-title">CIPHERTEXT (what the Oracle sees)</h3>
+            <div class="corr-row">
+              <span class="corr-cell corr-cell-ct" data-corr-ct-a>Enc(a)</span>
+              <span class="corr-op">⊞</span>
+              <span class="corr-cell corr-cell-ct" data-corr-ct-b>Enc(b)</span>
+              <span class="corr-op">=</span>
+              <span class="corr-cell corr-cell-ct corr-cell-result" data-corr-ct-sum>Enc(sum)</span>
+            </div>
+            <p class="corr-decrypt" data-corr-decrypt>
+              decrypt locally with your key → <strong data-corr-decrypted>?</strong>
+            </p>
+          </div>
+        </div>
+        <p class="corr-verdict" data-corr-verdict hidden>
+          Both tracks landed on the same number — the Oracle added two values it could never read,
+          and the ciphertext result decrypted to exactly a + b. That is homomorphism, demonstrated
+          rather than asserted.
+        </p>
       </section>
     </main>
 
@@ -325,16 +593,23 @@
     <dialog class="info-modal" data-info-modal aria-labelledby="info-title">
       <h2 id="info-title">What is Fully Homomorphic Encryption?</h2>
       <div class="info-content">
-        <p>FHE lets a server compute on your encrypted data without decrypting it.</p>
+        <p>FHE lets a server compute on your encrypted data without ever decrypting it.</p>
         <p>
-          <strong>TFHE-rs</strong> uses gate bootstrapping — every operation automatically refreshes
-          the noise budget, enabling unlimited computation depth.
+          <strong>TFHE-rs</strong> uses gate bootstrapping: every operation refreshes the ciphertext
+          noise, so you can keep computing without hitting a fixed circuit-depth wall — unlike
+          leveled schemes that budget for a preset number of operations.
         </p>
         <p>
-          There is no circuit depth limit. The server computes on your encrypted data without any
-          ability to decrypt it.
+          But bootstrapping is not free. Each gate pays a real bootstrapping cost, so in practice
+          FHE programs stay small and slow — the response time shown for even a single add is the
+          price you are watching. FHE removes the depth limit; it does not remove the cost.
         </p>
-        <p><em>This is the real thing.</em></p>
+        <p>
+          The subtle part: the server holds only an <em>evaluation key</em>. It can transform
+          ciphertexts (including bootstrapping) but has no path to the plaintext — that requires the
+          client secret key, which never leaves your browser.
+        </p>
+        <p><em>This is the real thing — with real limits, honestly shown.</em></p>
       </div>
       <button class="action action-green" data-close-info>[ CLOSE ]</button>
     </dialog>
@@ -353,7 +628,36 @@
     </details>
 
     <footer class="app-footer">
-      <p class="footer-links">Related demos: <a href="https://systemslibrarian.github.io/crypto-lab-ckks-lab/" target="_blank" rel="noopener noreferrer">CKKS approximate FHE for encrypted inference</a> · <a href="https://systemslibrarian.github.io/crypto-lab-fhe-arena/" target="_blank" rel="noopener noreferrer">BGV/BFV with noise budget and SIMD batching</a> · <a href="https://systemslibrarian.github.io/crypto-lab-paillier-gate/" target="_blank" rel="noopener noreferrer">additively homomorphic encryption for private aggregation</a> · <a href="https://systemslibrarian.github.io/crypto-lab-elgamal-plain/" target="_blank" rel="noopener noreferrer">ElGamal homomorphism and re-randomization</a></p>
+      <p class="footer-links">
+        Related demos:
+        <a
+          href="https://systemslibrarian.github.io/crypto-lab-ckks-lab/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >CKKS approximate FHE for encrypted inference</a
+        >
+        ·
+        <a
+          href="https://systemslibrarian.github.io/crypto-lab-fhe-arena/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >BGV/BFV with noise budget and SIMD batching</a
+        >
+        ·
+        <a
+          href="https://systemslibrarian.github.io/crypto-lab-paillier-gate/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >additively homomorphic encryption for private aggregation</a
+        >
+        ·
+        <a
+          href="https://systemslibrarian.github.io/crypto-lab-elgamal-plain/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >ElGamal homomorphism and re-randomization</a
+        >
+      </p>
       Whether you eat or drink or whatever you do, do it all for the glory of God. — 1 Corinthians
       10:31
     </footer>

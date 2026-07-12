@@ -4,7 +4,8 @@ import {
   base64ToUint8Array,
   bytesToHex,
   base64ToHex,
-  isValidFheUint8
+  isValidFheUint8,
+  ciphertextFingerprint
 } from './encoding'
 
 describe('uint8ArrayToBase64 / base64ToUint8Array', () => {
@@ -66,5 +67,25 @@ describe('isValidFheUint8', () => {
     expect(isValidFheUint8(1.5)).toBe(false)
     expect(isValidFheUint8(NaN)).toBe(false)
     expect(isValidFheUint8(Infinity)).toBe(false)
+  })
+})
+
+describe('ciphertextFingerprint (visualization only)', () => {
+  it('is deterministic for identical byte inputs', () => {
+    const bytes = new Uint8Array([1, 2, 3, 4, 250, 128])
+    expect(ciphertextFingerprint(bytes)).toEqual(ciphertextFingerprint(bytes))
+  })
+
+  it('changes when any byte changes (avalanche for the swatch)', () => {
+    const a = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    const b = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 9])
+    expect(ciphertextFingerprint(a).hex).not.toBe(ciphertextFingerprint(b).hex)
+  })
+
+  it('produces a hue within [0, 360) and a 10-char hex digest', () => {
+    const { hue, hex } = ciphertextFingerprint(new Uint8Array([9, 9, 9]))
+    expect(hue).toBeGreaterThanOrEqual(0)
+    expect(hue).toBeLessThan(360)
+    expect(hex).toMatch(/^[0-9a-f]{10}$/)
   })
 })

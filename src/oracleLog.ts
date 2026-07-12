@@ -24,9 +24,9 @@ export class OracleLog {
     this.append('[SYSTEM] TFHE-rs WebAssembly loading...')
     this.append(`[SYSTEM] Generating FHE key pair — please wait...`)
     this.append(`[SYSTEM] Key generation complete: ${keyGenSec}s`)
-    this.append('[SYSTEM] Gate bootstrapping: ACTIVE')
-    this.append('[SYSTEM] Circuit depth limit: NONE')
-    this.append('[SYSTEM] Server key derived. Ready to transmit.')
+    this.append('[SYSTEM] Gate bootstrapping: ACTIVE (noise refreshed per gate)')
+    this.append('[SYSTEM] No fixed circuit-depth wall — but every gate pays a bootstrap cost.')
+    this.append('[SYSTEM] Compressed server key derived (evaluation only, cannot decrypt).')
     this.append('[SYSTEM] READY. True FHE enabled.')
   }
 
@@ -36,19 +36,28 @@ export class OracleLog {
     this.append('[SYSTEM] Waking...')
   }
 
-  logTransmit(ctA: string, ctB: string): void {
-    this.append(`[WIRE]   POST /compute/add - payload: ${ctA.slice(0, 48)}...`)
-    this.append(`[WIRE]   ct_a: ${ctA.slice(0, 12)}... ct_b: ${ctB.slice(0, 12)}...`)
-    this.append('[WIRE]   Server key transmitted for evaluation.')
+  logTransmit(ctA: string, ctB: string, digestA: string, digestB: string): void {
+    // Real trace: byte counts and per-ciphertext fingerprints derived from the
+    // ACTUAL ciphertexts, so the log differs every run (probabilistic encryption).
+    const bytesA = Math.round((ctA.length * 3) / 4)
+    const bytesB = Math.round((ctB.length * 3) / 4)
+    this.append(`[WIRE]   POST /compute/add — ct_a ${bytesA}B, ct_b ${bytesB}B`)
+    this.append(`[WIRE]   ct_a fp:${digestA}  ct_b fp:${digestB}`)
+    this.append('[WIRE]   Compressed server key attached (evaluation key, cannot decrypt).')
   }
 
-  logComputing(responseTimeMs: number, scheme: string, bootstrapping: string): void {
+  logComputing(
+    responseTimeMs: number,
+    scheme: string,
+    bootstrapping: string,
+    resultDigest: string
+  ): void {
     this.append('[ORACLE] FheUint8 addition — gate bootstrapping on every operation')
     this.append(`[ORACLE] Scheme: ${scheme} (Zama AI)`)
     this.append(`[ORACLE] Bootstrapping: ${bootstrapping}`)
-    this.append('[ORACLE] Plaintext accessed: FALSE')
-    this.append('[ORACLE] Result ciphertext serialized.')
-    this.append(`[WIRE]   Response received in ${responseTimeMs}ms`)
+    this.append('[ORACLE] Plaintext accessed: FALSE (no client key present)')
+    this.append(`[ORACLE] Result ciphertext serialized. fp:${resultDigest}`)
+    this.append(`[WIRE]   Response received in ${responseTimeMs}ms (cost of one homomorphic add)`)
   }
 
   logDecrypt(): void {

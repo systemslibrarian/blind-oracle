@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 /**
  * E2E accessibility gate. Tests run against the production build served by
@@ -16,13 +16,13 @@ export default defineConfig({
     // The page derives its initial theme from prefers-color-scheme when no
     // saved preference exists; pin it to dark so the default scan is dark and
     // the toggle deterministically moves to light.
-    colorScheme: 'dark',
+    colorScheme: 'dark'
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'npm run preview -- --port 4223 --strictPort',
     url: 'http://localhost:4223/crypto-lab-blind-oracle/',
     reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
-  },
-});
+    timeout: 30_000
+  }
+})

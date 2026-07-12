@@ -14,9 +14,14 @@ export class WireAnimator {
   private drops: number[] = []
   private running = false
   private burstUntil = 0
+  // The schematic container carries the labelled-token flow (DOM/CSS driven).
+  // The canvas is now a faint DIRECTIONAL backdrop (top→bottom = client→oracle),
+  // reinforcing the trust boundary instead of being decorative rain.
+  private schematic: HTMLElement | null
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
+    this.schematic = document.querySelector('[data-wire-schematic]')
     const context = canvas.getContext('2d')
     if (!context) {
       throw new Error('2D canvas context unavailable')
@@ -63,18 +68,40 @@ export class WireAnimator {
     requestAnimationFrame(tick)
   }
 
-  triggerTransmission(): void {
+  /**
+   * Kick off the labelled-token flow across the wire.
+   * @param direction 'out' = ct_a/ct_b/serverKey leaving the browser toward the
+   *   Oracle; 'return' = ct_result coming back. The secret-key chip never moves.
+   */
+  triggerTransmission(direction: 'out' | 'return' = 'out'): void {
     this.burstUntil = performance.now() + 1200
+    const el = this.schematic
+    if (!el) {
+      return
+    }
+    // Restart the CSS animation reliably by toggling the class off, forcing a
+    // reflow, then on again — so repeated compute clicks re-run the flow.
+    el.classList.remove('wire-flow-out', 'wire-flow-return')
+    void el.offsetWidth
+    el.classList.add(direction === 'return' ? 'wire-flow-return' : 'wire-flow-out')
+  }
+
+  /** Clear any in-progress flow markers (used on reset). */
+  clearTransmission(): void {
+    this.schematic?.classList.remove('wire-flow-out', 'wire-flow-return')
   }
 
   private drawFrame(): void {
-    this.ctx.fillStyle = 'rgba(7, 7, 15, 0.14)'
+    this.ctx.fillStyle = 'rgba(7, 7, 15, 0.16)'
     this.ctx.fillRect(0, 0, this.width, this.height)
 
-    this.ctx.font = '14px "Share Tech Mono"'
+    this.ctx.font = '13px "Share Tech Mono"'
     const now = performance.now()
     const burst = now < this.burstUntil
-    const color = burst ? '#ff7a45' : '#00ffb3'
+    // Faint backdrop; the meaningful labelled tokens live in the DOM overlay.
+    // During a burst the flow brightens/quickens to signal payload movement,
+    // but it always moves top→bottom (client→oracle), never random rain.
+    const color = burst ? 'rgba(255,122,69,0.55)' : 'rgba(0,255,179,0.28)'
     this.ctx.fillStyle = color
 
     for (let i = 0; i < this.drops.length; i += 1) {
@@ -84,7 +111,7 @@ export class WireAnimator {
         .toString(16)
         .toUpperCase()
       this.ctx.fillText(glyph, x, y)
-      this.drops[i] = y > this.height + 20 ? 0 : y + (burst ? 7 : 4)
+      this.drops[i] = y > this.height + 20 ? 0 : y + (burst ? 7 : 3)
     }
   }
 }

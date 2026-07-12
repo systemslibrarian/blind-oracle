@@ -1044,6 +1044,646 @@ html[data-theme='light'] summary:focus-visible {
   outline-color: var(--orange);
 }
 
+/* ── Ciphertext fingerprint (value-dependent swatch + digest) ── */
+
+.cipher-fingerprint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.swatch {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme='light'] .swatch {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.swatch-digest {
+  font-size: 12px;
+  letter-spacing: 1px;
+  /* Light-on-dark; near-white clears AA on the tinted cipher-panel. */
+  color: #ffe8dc;
+}
+
+html[data-theme='light'] .swatch-digest {
+  color: #2a1a14;
+}
+
+.fingerprint-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #ffd9c8;
+}
+
+html[data-theme='light'] .fingerprint-note {
+  color: #5a2010;
+}
+
+.reencrypt-note {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(0, 255, 204, 0.85);
+}
+
+html[data-theme='light'] .reencrypt-note {
+  color: #0d6f5e;
+}
+
+/* Secondary (re-encrypt) button: green outline, dimmer than the primary. */
+.action-ghost-green {
+  border: 1px solid var(--green-soft);
+  color: var(--green);
+  font-size: 13px;
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+
+/* ── Operation buttons + multiply explainer ── */
+
+.op-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-disabled-teaching {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+html[data-theme='light'] .action-disabled-teaching {
+  /* Darker orange to clear AA (4.5:1) as button text on the light canvas. */
+  color: #a8431b;
+  border-color: rgba(191, 79, 32, 0.55);
+}
+
+.op-why {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #ffe8dc;
+  border-left: 2px solid var(--orange-soft);
+  padding-left: 10px;
+}
+
+html[data-theme='light'] .op-why {
+  color: #2a1a14;
+}
+
+/* ── Wire schematic: labelled token flow over a faint directional backdrop ── */
+
+.wire-schematic {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+}
+
+.wire-schematic #wire-canvas {
+  flex: 1;
+  min-height: 0;
+}
+
+.wire-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  pointer-events: none;
+}
+
+.wire-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wire-end-oracle {
+  justify-content: flex-end;
+}
+
+.wire-end-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme='light'] .wire-end-label {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.wire-chip {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--green-soft);
+  color: var(--green);
+  background-color: rgba(0, 255, 204, 0.08);
+}
+
+.wire-chip-absent {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.05);
+  text-decoration: line-through;
+}
+
+html[data-theme='light'] .wire-chip-absent {
+  border-color: rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.wire-lane {
+  position: relative;
+  flex: 1;
+  margin: 8px 0;
+}
+
+.wire-token {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  border: 1px solid var(--orange-soft);
+  color: var(--orange);
+  background-color: rgba(255, 123, 69, 0.12);
+  opacity: 0;
+}
+
+.wire-token-result {
+  border-color: var(--green-soft);
+  color: var(--green);
+  background-color: rgba(0, 255, 204, 0.12);
+}
+
+html[data-theme='light'] .wire-token {
+  background-color: rgba(191, 79, 32, 0.1);
+  color: #a8431b;
+  border-color: rgba(191, 79, 32, 0.4);
+}
+
+html[data-theme='light'] .wire-token-result {
+  background-color: rgba(13, 111, 94, 0.1);
+  color: #0d6f5e;
+  border-color: rgba(13, 111, 94, 0.4);
+}
+
+.wire-op-box {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--orange-soft);
+  border-radius: 6px;
+  color: var(--orange);
+  font-size: 16px;
+  background-color: rgba(255, 123, 69, 0.1);
+}
+
+html[data-theme='light'] .wire-op-box {
+  color: #a8431b;
+  border-color: rgba(191, 79, 32, 0.4);
+  background-color: rgba(191, 79, 32, 0.08);
+}
+
+/* Outbound flow: ct_a, ct_b, serverKey travel top→bottom (client→oracle). */
+.wire-schematic.wire-flow-out .wire-token-a {
+  animation: token-out 1.1s ease-in forwards;
+}
+.wire-schematic.wire-flow-out .wire-token-b {
+  animation: token-out 1.1s ease-in 0.2s forwards;
+}
+.wire-schematic.wire-flow-out .wire-token-key {
+  animation: token-out 1.1s ease-in 0.4s forwards;
+}
+.wire-schematic.wire-flow-out .wire-op-box {
+  animation: op-pulse 0.6s ease-out 1s;
+}
+
+/* Return flow: ct_result travels bottom→top (oracle→client). */
+.wire-schematic.wire-flow-return .wire-token-result {
+  animation: token-return 1.1s ease-out forwards;
+}
+
+@keyframes token-out {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes token-return {
+  0% {
+    top: 100%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes op-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 12px var(--orange-soft);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.wire-caption {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme='light'] .wire-caption {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.response-cost {
+  color: var(--orange);
+  font-size: 13px;
+}
+
+html[data-theme='light'] .response-cost {
+  color: #a8431b;
+}
+
+/* ── Noise budget / gate bootstrapping explainer ── */
+
+.noise-explainer {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+
+html[data-theme='light'] .noise-explainer {
+  border-color: rgba(0, 0, 0, 0.12);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.noise-title {
+  margin: 0 0 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme='light'] .noise-title {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.noise-text {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme='light'] .noise-text {
+  color: #1a2a24;
+}
+
+.noise-text strong {
+  color: var(--green);
+}
+
+.noise-text em {
+  color: var(--orange);
+  font-style: normal;
+}
+
+html[data-theme='light'] .noise-text em {
+  color: #a8431b;
+}
+
+.noise-diagram {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 68px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+  padding-bottom: 2px;
+}
+
+html[data-theme='light'] .noise-diagram {
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+}
+
+.noise-bar {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+html[data-theme='light'] .noise-bar {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.noise-fill {
+  width: 100%;
+  background: linear-gradient(180deg, var(--orange), rgba(255, 123, 69, 0.2));
+  height: 20%;
+  transform-origin: bottom;
+  animation: noise-cycle 3.6s ease-in-out infinite;
+}
+
+.noise-fill-2 {
+  animation-delay: 1.2s;
+}
+
+.noise-fill-3 {
+  animation-delay: 2.4s;
+}
+
+@keyframes noise-cycle {
+  0% {
+    height: 20%;
+  }
+  70% {
+    height: 92%;
+  }
+  72% {
+    height: 20%;
+  }
+  100% {
+    height: 20%;
+  }
+}
+
+.noise-ceiling {
+  position: absolute;
+  top: -7px;
+  right: 0;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.7);
+  background-color: var(--bg);
+  padding: 0 4px;
+}
+
+html[data-theme='light'] .noise-ceiling {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.noise-legend {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+html[data-theme='light'] .noise-legend {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Plaintext vs ciphertext correspondence panel (spans the full grid) ── */
+
+.zone-correspondence {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 10px;
+}
+
+html[data-theme='light'] .zone-correspondence {
+  border-top-color: rgba(0, 0, 0, 0.12);
+}
+
+.corr-intro {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme='light'] .corr-intro {
+  color: #1a2a24;
+}
+
+.corr-intro strong {
+  color: var(--green);
+}
+
+.corr-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.corr-track {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 12px 14px;
+}
+
+.corr-track-plain {
+  border-color: var(--green-soft);
+  background-color: rgba(0, 255, 204, 0.04);
+}
+
+.corr-track-cipher {
+  border-color: var(--orange-soft);
+  background-color: rgba(255, 123, 69, 0.04);
+}
+
+.corr-track-title {
+  margin: 0 0 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+
+.corr-track-plain .corr-track-title {
+  color: var(--green);
+}
+
+.corr-track-cipher .corr-track-title {
+  color: var(--orange);
+}
+
+html[data-theme='light'] .corr-track-cipher .corr-track-title {
+  color: #a8431b;
+}
+
+.corr-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.corr-cell {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #f1f5f4;
+  background-color: rgba(255, 255, 255, 0.04);
+  min-width: 3ch;
+  text-align: center;
+}
+
+html[data-theme='light'] .corr-cell {
+  color: #1a2a24;
+  border-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.corr-cell-ct {
+  font-size: 14px;
+  color: var(--orange);
+  border-color: var(--orange-soft);
+}
+
+html[data-theme='light'] .corr-cell-ct {
+  color: #a8431b;
+}
+
+.corr-cell-result {
+  font-weight: 700;
+}
+
+.corr-track-plain .corr-cell-result {
+  color: var(--green);
+  border-color: var(--green-soft);
+}
+
+.corr-op {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme='light'] .corr-op {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.corr-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.corr-link-line {
+  flex: 1;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme='light'] .corr-link-line {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.corr-link-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+}
+
+html[data-theme='light'] .corr-link-label {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.corr-decrypt {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme='light'] .corr-decrypt {
+  color: #1a2a24;
+}
+
+.corr-decrypt strong {
+  color: var(--green);
+  font-size: 16px;
+}
+
+.corr-verdict {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  border: 1px solid var(--green-soft);
+  background-color: rgba(0, 255, 204, 0.06);
+  padding: 12px 14px;
+  color: #eafff8;
+}
+
+html[data-theme='light'] .corr-verdict {
+  color: #0d3a30;
+  background-color: rgba(13, 111, 94, 0.06);
+}
+
+@media (min-width: 981px) {
+  .corr-tracks {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .corr-track {
+    flex: 1;
+  }
+
+  .corr-link {
+    flex-direction: column;
+    flex: 0 0 auto;
+  }
+
+  .corr-link-line {
+    width: 1px;
+    height: auto;
+    flex: 1;
+  }
+}
+
 /* ── Respect reduced-motion preferences ── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1057,5 +1697,24 @@ html[data-theme='light'] summary:focus-visible {
 
   .pulse {
     display: none;
+  }
+
+  /* Static, meaningful end-state instead of motion: show the payload tokens
+     parked mid-lane so the schematic still reads without animation, and pin the
+     noise bars at a representative mid level. */
+  .wire-token-a,
+  .wire-token-b,
+  .wire-token-key {
+    opacity: 1;
+    top: 30%;
+  }
+
+  .wire-token-result {
+    opacity: 1;
+    top: 60%;
+  }
+
+  .noise-fill {
+    height: 60%;
   }
 }

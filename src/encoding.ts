@@ -40,3 +40,39 @@ export function base64ToHex(base64: string): string {
 export function isValidFheUint8(value: number): boolean {
   return Number.isInteger(value) && value >= 0 && value <= 255
 }
+
+/**
+ * A tiny fingerprint of raw ciphertext bytes, purely for VISUALIZATION.
+ *
+ * This is NOT a cryptographic hash and is never used for security — it exists
+ * so the UI can render a stable colour swatch and short digest that visibly
+ * changes when the underlying ciphertext bytes change. Because TFHE encryption
+ * is probabilistic, encrypting the same value twice yields different bytes, so
+ * this fingerprint differs too — which is exactly the property we want to make
+ * observable. FNV-1a over the full byte string keeps it cheap and dependent on
+ * every byte.
+ */
+export function ciphertextFingerprint(bytes: Uint8Array): {
+  hex: string
+  hue: number
+} {
+  // 32-bit FNV-1a.
+  let h = 0x811c9dc5
+  for (let i = 0; i < bytes.length; i++) {
+    h ^= bytes[i]
+    // h *= 16777619, kept in 32-bit range via Math.imul.
+    h = Math.imul(h, 0x01000193)
+  }
+  // Fold to an unsigned 32-bit value and derive a second word so the swatch
+  // uses more than one byte of entropy.
+  const u = h >>> 0
+  let h2 = 0x811c9dc5
+  for (let i = bytes.length - 1; i >= 0; i--) {
+    h2 ^= bytes[i]
+    h2 = Math.imul(h2, 0x01000193)
+  }
+  const u2 = h2 >>> 0
+  const hex = (u.toString(16).padStart(8, '0') + u2.toString(16).padStart(8, '0')).slice(0, 10)
+  const hue = u % 360
+  return { hex, hue }
+}
