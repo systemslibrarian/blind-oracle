@@ -6,6 +6,10 @@
   --orange: #ff7b45;
   --orange-soft: rgba(255, 123, 69, 0.4);
   --wire: rgba(255, 255, 255, 0.5);
+  /* Hero body copy + why-box tint (cl-hero standard). Near-white on the dark
+     canvas clears AA at ~17:1; tint is a faint green wash on --bg. */
+  --hero-text: #e8f5f0;
+  --hero-why-bg: rgba(0, 255, 204, 0.06);
 }
 
 html[data-theme='light'] {
@@ -16,6 +20,9 @@ html[data-theme='light'] {
   --orange: #bf4f20;
   --orange-soft: rgba(191, 79, 32, 0.4);
   --wire: rgba(7, 7, 15, 0.6);
+  /* Dark ink on the pale light canvas (#f3fbf7): ~15:1, clears AA. */
+  --hero-text: #0a1f1a;
+  --hero-why-bg: rgba(13, 111, 94, 0.08);
 }
 
 * {
@@ -105,10 +112,80 @@ html[data-theme='light'] .skip-link {
   min-height: 100vh;
 }
 
-.app-header {
+/* BEGIN cl-hero standard — managed, keep in sync across fleet */
+/* Accent/tint/text colors map to this demo's theme vars:
+   --green -> accent for title/label/why-tint, #e8f5f0 body copy (AA on --bg in
+   both themes: dark 15:1, light bg is pale so we darken via --ink below). */
+.cl-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(1rem, 4vw, 3rem);
+  flex-wrap: wrap;
+  margin: clamp(1rem, 3vw, 2rem) 0 1.5rem;
+  grid-column: 1 / -1;
+  padding: 0 22px;
   position: relative;
   z-index: 120;
 }
+.cl-hero-main {
+  flex: 1 1 22rem;
+  min-width: min(100%, 20rem);
+}
+.cl-hero-title {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.6rem, 3.8vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--green);
+}
+.cl-hero-sub {
+  margin: 0.4rem 0 0;
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  letter-spacing: 0.01em;
+  color: var(--orange);
+  opacity: 0.95;
+}
+.cl-hero-desc {
+  margin: 0.55rem 0 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 60ch;
+  color: var(--hero-text);
+}
+.cl-hero-why {
+  flex: 0 1 min(40%, 26rem);
+  min-width: min(100%, 15rem);
+  border: 1px solid var(--green-soft);
+  border-radius: 10px;
+  padding: 0.85rem 1.05rem;
+  background-color: var(--hero-why-bg);
+}
+.cl-hero-why-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--green);
+}
+.cl-hero-why-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--hero-text);
+}
+@media (max-width: 640px) {
+  .cl-hero {
+    flex-direction: column;
+  }
+  .cl-hero-why {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+/* END cl-hero standard */
 
 .theme-toggle {
   position: absolute;

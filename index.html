@@ -308,11 +308,28 @@
       </div>
     </div>
 
-    <header class="app-header">
-      <h1 class="visually-hidden">Blind Oracle — Fully Homomorphic Encryption Demo</h1>
-      <button class="theme-toggle" data-theme-toggle aria-label="Switch to light mode">🌙</button>
-    </header>
+    <button class="theme-toggle" data-theme-toggle aria-label="Switch to light mode" hidden>
+      🌙
+    </button>
     <main class="app-grid" id="main-content">
+      <header class="cl-hero">
+        <div class="cl-hero-main">
+          <h1 class="cl-hero-title">Blind Oracle</h1>
+          <p class="cl-hero-sub">FHE · TFHE-rs · gate bootstrapping</p>
+          <p class="cl-hero-desc">
+            Encrypt two numbers in your browser, let an untrusted Oracle add the ciphertexts it can
+            never read, then decrypt the sum locally.
+          </p>
+        </div>
+        <aside class="cl-hero-why" aria-label="Why it matters">
+          <span class="cl-hero-why-label">WHY IT MATTERS</span>
+          <p class="cl-hero-why-text">
+            Fully homomorphic encryption lets a server crunch data it is never allowed to see. That
+            unlocks private cloud analytics on medical, financial, and genomic records — outsourcing
+            computation without ever surrendering the plaintext or the key.
+          </p>
+        </aside>
+      </header>
       <section class="zone zone-questioner" aria-labelledby="questioner-heading">
         <h2 class="zone-label zone-label-green" id="questioner-heading">THE QUESTIONER</h2>
         <p class="zone-subtext zone-subtext-green">Your keys. Your values. Your world.</p>
