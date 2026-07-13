@@ -1758,6 +1758,300 @@ html[data-theme='light'] .corr-verdict {
   }
 }
 
+/* ── Inline glosses: first-use microcopy for key terms ── */
+
+.inline-gloss {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 7px;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  font-style: normal;
+  white-space: normal;
+  color: #dfeee9;
+  vertical-align: middle;
+}
+
+html[data-theme='light'] .inline-gloss {
+  border-color: rgba(0, 0, 0, 0.4);
+  color: #1a2a24;
+}
+
+/* Gloss inside the orange oracle subtext picks up the panel's warm tint. */
+.zone-subtext-orange .inline-gloss {
+  border-color: var(--orange-soft);
+  color: #ffe0d2;
+}
+
+html[data-theme='light'] .zone-subtext-orange .inline-gloss {
+  color: #7a2e13;
+  border-color: rgba(191, 79, 32, 0.55);
+}
+
+/* Gloss inside the green explainer note. */
+.explain-note .inline-gloss {
+  border-color: var(--green-soft);
+  color: #d7fff4;
+}
+
+html[data-theme='light'] .explain-note .inline-gloss {
+  color: #0b5546;
+}
+
+/* ── "Same answer" static reveal emphasis (motion-free) ── */
+
+.corr-verdict-icon {
+  color: var(--green);
+  font-weight: 700;
+}
+
+html[data-theme='light'] .corr-verdict-icon {
+  color: #0b5546;
+}
+
+/* When both tracks resolve to the same number, give the correspondence a
+   persistent static highlight so the payoff moment carries visual weight.
+   No animation: just brighter borders and a lit "same answer" link. */
+.corr-tracks--matched .corr-link-line {
+  background-color: var(--green);
+}
+
+.corr-tracks--matched .corr-link-label {
+  color: var(--green);
+  font-weight: 700;
+}
+
+html[data-theme='light'] .corr-tracks--matched .corr-link-label {
+  color: #0b5546;
+}
+
+.corr-tracks--matched .corr-cell-result {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1px var(--green);
+}
+
+.corr-tracks--matched .corr-decrypt strong {
+  border-bottom: 2px solid var(--green);
+}
+
+/* ── Peek inside the ciphertext: static LWE-style noise diagram ── */
+
+.peek {
+  margin-top: 6px;
+  border: 1px solid var(--orange-soft);
+  background-color: rgba(255, 123, 69, 0.05);
+  padding: 12px 14px;
+}
+
+html[data-theme='light'] .peek {
+  background-color: rgba(191, 79, 32, 0.05);
+}
+
+.peek-title {
+  margin: 0 0 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  color: var(--orange);
+}
+
+html[data-theme='light'] .peek-title {
+  color: #a8431b;
+}
+
+.peek-intro {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ffe8dc;
+}
+
+html[data-theme='light'] .peek-intro {
+  color: #2a1a14;
+}
+
+.peek-intro strong {
+  color: var(--orange);
+}
+
+html[data-theme='light'] .peek-intro strong {
+  color: #a8431b;
+}
+
+.action-ghost-orange {
+  border: 1px solid var(--orange-soft);
+  color: var(--orange);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+html[data-theme='light'] .action-ghost-orange {
+  color: #a8431b;
+  border-color: rgba(191, 79, 32, 0.55);
+}
+
+.peek-body {
+  margin-top: 12px;
+}
+
+.peek-lattice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
+}
+
+html[data-theme='light'] .peek-lattice {
+  border-color: rgba(0, 0, 0, 0.14);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.peek-sample {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+}
+
+.peek-sample-label {
+  min-width: 8ch;
+  color: var(--orange);
+  font-weight: 700;
+}
+
+html[data-theme='light'] .peek-sample-label {
+  color: #a8431b;
+}
+
+.peek-slot {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.peek-slot-signal {
+  border: 2px solid var(--green);
+  color: var(--green);
+  background-color: rgba(0, 255, 204, 0.1);
+}
+
+html[data-theme='light'] .peek-slot-signal {
+  color: #0b5546;
+  background-color: rgba(13, 111, 94, 0.1);
+}
+
+.peek-plus {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme='light'] .peek-plus {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.peek-noise-strip {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.peek-noise {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+}
+
+html[data-theme='light'] .peek-noise {
+  border-color: rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.peek-noise-strip-grown .peek-noise {
+  border-color: var(--orange-soft);
+  color: var(--orange);
+}
+
+html[data-theme='light'] .peek-noise-strip-grown .peek-noise {
+  color: #a8431b;
+}
+
+.peek-noise-label {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+html[data-theme='light'] .peek-noise-label {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.peek-noise-label-warn {
+  color: var(--orange);
+}
+
+html[data-theme='light'] .peek-noise-label-warn {
+  color: #a8431b;
+}
+
+.peek-eq {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.75);
+  padding-left: 2px;
+}
+
+html[data-theme='light'] .peek-eq {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.peek-sample-sum {
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  padding-top: 8px;
+}
+
+html[data-theme='light'] .peek-sample-sum {
+  border-top-color: rgba(0, 0, 0, 0.2);
+}
+
+.peek-points {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ffe8dc;
+}
+
+html[data-theme='light'] .peek-points {
+  color: #2a1a14;
+}
+
+.peek-points li {
+  margin-bottom: 8px;
+}
+
+.peek-points strong {
+  color: var(--orange);
+}
+
+html[data-theme='light'] .peek-points strong {
+  color: #a8431b;
+}
+
 /* ── Respect reduced-motion preferences ── */
 
 @media (prefers-reduced-motion: reduce) {

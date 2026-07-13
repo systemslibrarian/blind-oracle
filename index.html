@@ -343,7 +343,8 @@
             <li>Your browser decrypts locally and reveals the sum.</li>
           </ol>
           <p class="explain-note">
-            This is Fully Homomorphic Encryption (TFHE-rs, gate bootstrapping). The &ldquo;plaintext
+            This is Fully Homomorphic Encryption (TFHE-rs, gate bootstrapping
+            <span class="inline-gloss">bootstrapping = noise reset</span>). The &ldquo;plaintext
             world vs ciphertext world&rdquo; panel below shows <em>why</em> the encrypted result
             decrypts to the right answer.
           </p>
@@ -462,7 +463,12 @@
 
       <section class="zone zone-oracle" aria-labelledby="oracle-heading">
         <h2 class="zone-label zone-label-orange" id="oracle-heading">THE BLIND ORACLE</h2>
-        <p class="zone-subtext zone-subtext-orange">Evaluation key only. Cannot decrypt.</p>
+        <p class="zone-subtext zone-subtext-orange">
+          Evaluation key only. Cannot decrypt.
+          <span class="inline-gloss"
+            >evaluation key = can transform ciphertext, cannot decrypt</span
+          >
+        </p>
 
         <div class="cipher-panel">
           <h3 class="cipher-title">ct_a preview</h3>
@@ -557,10 +563,94 @@
           </div>
         </div>
         <p class="corr-verdict" data-corr-verdict hidden>
-          Both tracks landed on the same number — the Oracle added two values it could never read,
-          and the ciphertext result decrypted to exactly a + b. That is homomorphism, demonstrated
-          rather than asserted.
+          <span class="corr-verdict-icon" aria-hidden="true">✓</span> Both tracks landed on the same
+          number — the Oracle added two values it could never read, and the ciphertext result
+          decrypted to exactly a + b. That is homomorphism, demonstrated rather than asserted.
         </p>
+
+        <div class="peek">
+          <h3 class="peek-title">WHY ADDING NOISE STILL ADDS: PEEK INSIDE ONE CIPHERTEXT</h3>
+          <p class="peek-intro">
+            A TFHE ciphertext is not a locked box holding your number — it is your number
+            <strong>plus a pile of random noise</strong>. The Oracle can add two of these piles
+            without ever separating value from noise, which is exactly why it computes but cannot
+            read. Open the peek to see one small value buried under that noise.
+          </p>
+          <button
+            class="action action-orange action-ghost-orange"
+            data-peek-toggle
+            type="button"
+            aria-expanded="false"
+            aria-controls="peek-body"
+          >
+            [ PEEK INSIDE THE CIPHERTEXT ]
+          </button>
+          <div class="peek-body" id="peek-body" data-peek-body hidden>
+            <div
+              class="peek-lattice"
+              tabindex="0"
+              role="img"
+              aria-label="Encrypting the value 3 places it in one signal slot, then buries it under a row of random noise bits. Adding two such ciphertexts adds both the values and the noise, so the sum carries more noise than either input; when noise reaches the ceiling, gate bootstrapping resets it so computation can continue."
+            >
+              <div class="peek-sample">
+                <span class="peek-sample-label">Enc(3) =</span>
+                <span class="peek-slot peek-slot-signal" title="the encoded value">3</span>
+                <span class="peek-plus">+</span>
+                <span class="peek-noise-strip" aria-hidden="true">
+                  <span class="peek-noise">7</span><span class="peek-noise">1</span
+                  ><span class="peek-noise">9</span><span class="peek-noise">4</span
+                  ><span class="peek-noise">2</span><span class="peek-noise">8</span
+                  ><span class="peek-noise">5</span><span class="peek-noise">0</span>
+                </span>
+                <span class="peek-noise-label">random noise (hides the 3)</span>
+              </div>
+              <div class="peek-sample">
+                <span class="peek-sample-label">Enc(4) =</span>
+                <span class="peek-slot peek-slot-signal" title="the encoded value">4</span>
+                <span class="peek-plus">+</span>
+                <span class="peek-noise-strip" aria-hidden="true">
+                  <span class="peek-noise">3</span><span class="peek-noise">6</span
+                  ><span class="peek-noise">1</span><span class="peek-noise">8</span
+                  ><span class="peek-noise">0</span><span class="peek-noise">9</span
+                  ><span class="peek-noise">2</span><span class="peek-noise">7</span>
+                </span>
+                <span class="peek-noise-label">different random noise</span>
+              </div>
+              <div class="peek-eq" aria-hidden="true">the Oracle adds them slot-by-slot ↓</div>
+              <div class="peek-sample peek-sample-sum">
+                <span class="peek-sample-label">Enc(7) =</span>
+                <span class="peek-slot peek-slot-signal" title="3 + 4 = 7, still hidden">7</span>
+                <span class="peek-plus">+</span>
+                <span class="peek-noise-strip peek-noise-strip-grown" aria-hidden="true">
+                  <span class="peek-noise">A</span><span class="peek-noise">7</span
+                  ><span class="peek-noise">B</span><span class="peek-noise">C</span
+                  ><span class="peek-noise">2</span><span class="peek-noise">1</span
+                  ><span class="peek-noise">7</span><span class="peek-noise">7</span
+                  ><span class="peek-noise">F</span><span class="peek-noise">3</span
+                  ><span class="peek-noise">D</span><span class="peek-noise">9</span>
+                </span>
+                <span class="peek-noise-label peek-noise-label-warn"
+                  >noise grew (both piles added)</span
+                >
+              </div>
+            </div>
+            <ul class="peek-points">
+              <li>
+                <strong>Value + noise, added together:</strong> adding the two ciphertexts adds both
+                the hidden 3 and 4 (giving 7) <em>and</em> both noise piles — so the result is a
+                noisier encoding of the correct sum. Your secret key subtracts the noise away; the
+                Oracle has no key, so to it the whole strip is random.
+              </li>
+              <li>
+                <strong>Why bootstrapping exists:</strong> each add grows the noise strip. Do too
+                many and the noise overruns the value slot — decryption returns garbage. Gate
+                bootstrapping resets the noise back down after each gate, at real cost, so the
+                computation can keep going. That is the rise-then-reset the noise budget above is
+                about.
+              </li>
+            </ul>
+          </div>
+        </div>
       </section>
     </main>
 

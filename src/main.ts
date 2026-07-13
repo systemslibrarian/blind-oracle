@@ -58,6 +58,9 @@ const corrCtBEl = document.querySelector('[data-corr-ct-b]') as HTMLElement
 const corrCtSumEl = document.querySelector('[data-corr-ct-sum]') as HTMLElement
 const corrDecryptedEl = document.querySelector('[data-corr-decrypted]') as HTMLElement
 const corrVerdictEl = document.querySelector('[data-corr-verdict]') as HTMLElement
+const corrTracksEl = document.querySelector('.corr-tracks') as HTMLElement
+const peekToggle = document.querySelector('[data-peek-toggle]') as HTMLButtonElement
+const peekBody = document.querySelector('[data-peek-body]') as HTMLElement
 const modal = document.querySelector('[data-inspector-modal]') as HTMLDialogElement
 const modalOpenBtn = document.querySelector('[data-open-inspector]') as HTMLButtonElement
 const modalCloseBtn = document.querySelector('[data-close-inspector]') as HTMLButtonElement
@@ -280,6 +283,7 @@ function resetCorrespondence(): void {
   corrCtSumEl.textContent = 'Enc(sum)'
   corrDecryptedEl.textContent = '?'
   corrVerdictEl.hidden = true
+  corrTracksEl.classList.remove('corr-tracks--matched')
 }
 
 /**
@@ -314,6 +318,7 @@ async function encryptCurrentInputs(): Promise<void> {
   corrCtSumEl.textContent = 'Enc(sum)'
   corrDecryptedEl.textContent = '?'
   corrVerdictEl.hidden = true
+  corrTracksEl.classList.remove('corr-tracks--matched')
 
   // A fresh encryption invalidates any prior computed result.
   lastResultCt = ''
@@ -358,6 +363,14 @@ multiplyInfoBtn.addEventListener('click', () => {
   const nowHidden = !multiplyWhyEl.hidden
   multiplyWhyEl.hidden = nowHidden
   multiplyInfoBtn.setAttribute('aria-expanded', String(!nowHidden))
+})
+
+// "Peek inside the ciphertext": reveal a static LWE-style diagram showing the
+// hidden value buried under noise. No motion — just show/hide the diagram.
+peekToggle.addEventListener('click', () => {
+  const willShow = peekBody.hidden
+  peekBody.hidden = !willShow
+  peekToggle.setAttribute('aria-expanded', String(willShow))
 })
 
 computeButton.addEventListener('click', async () => {
@@ -417,6 +430,10 @@ computeButton.addEventListener('click', async () => {
     // plaintext-track sum, making Enc(a) ⊞ Enc(b) = Enc(a + b) literally visible.
     corrDecryptedEl.textContent = String(resultValue)
     corrVerdictEl.hidden = false
+    // Static (motion-free) emphasis: mark the tracks matched so the "same answer"
+    // link and both result cells get a persistent highlight — the payoff moment
+    // gets visual weight without any count-up or flash animation.
+    corrTracksEl.classList.add('corr-tracks--matched')
 
     state.setState('REVEALED')
     resultBar.classList.add('revealed')
