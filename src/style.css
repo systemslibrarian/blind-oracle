@@ -112,7 +112,6 @@ html[data-theme='light'] .skip-link {
   min-height: 100vh;
 }
 
-/* BEGIN cl-hero standard — managed, keep in sync across fleet */
 /* Accent/tint/text colors map to this demo's theme vars:
    --green -> accent for title/label/why-tint, #e8f5f0 body copy (AA on --bg in
    both themes: dark 15:1, light bg is pale so we darken via --ink below). */
@@ -184,8 +183,11 @@ html[data-theme='light'] .skip-link {
     flex-basis: auto;
     width: 100%;
   }
+  .cl-hero-main {
+    flex-basis: auto;
+    min-width: 0;
+  }
 }
-/* END cl-hero standard */
 
 .theme-toggle {
   position: absolute;
