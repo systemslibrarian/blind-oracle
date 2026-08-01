@@ -521,8 +521,9 @@
         </h2>
         <p class="corr-intro">
           Homomorphism means the same computation runs in both worlds and the answers match:
-          <strong>Enc(a) ⊞ Enc(b) decrypts to a + b</strong>. Encrypt and compute above, then watch
-          both tracks fill in.
+          <strong>Enc(a) ⊞ Enc(b) decrypts to a + b</strong>. Both worlds use the same 8-bit type,
+          so both wrap at 256 — the plaintext track adds as a <code>u8</code> and FheUint8 does the
+          same. Encrypt and compute above, then watch both tracks fill in.
         </p>
         <div class="corr-tracks">
           <div class="corr-track corr-track-plain">
@@ -534,6 +535,7 @@
               <span class="corr-op">=</span>
               <span class="corr-cell corr-cell-result" data-corr-plain-sum>?</span>
             </div>
+            <p class="corr-wrap-note" data-corr-wrap-note hidden></p>
           </div>
 
           <div class="corr-link" aria-hidden="true">
@@ -559,7 +561,15 @@
         <p class="corr-verdict" data-corr-verdict hidden>
           <span class="corr-verdict-icon" aria-hidden="true">✓</span> Both tracks landed on the same
           number — the Oracle added two values it could never read, and the ciphertext result
-          decrypted to exactly a + b. That is homomorphism, demonstrated rather than asserted.
+          decrypted to exactly what the plaintext <code>u8</code> addition produced. That is
+          homomorphism, demonstrated rather than asserted.
+        </p>
+        <p class="corr-verdict corr-verdict-mismatch" data-corr-mismatch hidden>
+          <span class="corr-verdict-icon" aria-hidden="true">✕</span> The two tracks did
+          <strong>not</strong> land on the same number. That is a real mismatch, not a rounding
+          quirk — the decrypted ciphertext result disagrees with the plaintext
+          <code>u8</code> addition, so something in the round-trip (keys, transport, or the Oracle's
+          operation) is wrong. Nothing here is being asserted on your behalf.
         </p>
 
         <div class="peek">

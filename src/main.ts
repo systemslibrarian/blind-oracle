@@ -26,6 +26,20 @@ let fheCtx: FheContext | null = null
 let cipherA: EncryptedValue | null = null
 let cipherB: EncryptedValue | null = null
 let lastResultCt = ''
+/**
+ * The plaintext-track answer for the currently-encrypted inputs, computed with
+ * the SAME u8 semantics FheUint8 uses (wrapping mod 256). Null until a pair of
+ * values has been encrypted. The verdict below is gated on this matching the
+ * decrypted ciphertext-track result, so the page can never claim a match it did
+ * not actually observe.
+ */
+let plainSum: number | null = null
+
+/** FheUint8 arithmetic is mod 256; mirror it exactly on the plaintext track. */
+const U8_MODULUS = 256
+function wrapU8(n: number): number {
+  return ((n % U8_MODULUS) + U8_MODULUS) % U8_MODULUS
+}
 
 const statusEl = document.querySelector('[data-state]') as HTMLElement
 const responseTimeEl = document.querySelector('[data-response-time]') as HTMLElement
@@ -58,6 +72,8 @@ const corrCtBEl = document.querySelector('[data-corr-ct-b]') as HTMLElement
 const corrCtSumEl = document.querySelector('[data-corr-ct-sum]') as HTMLElement
 const corrDecryptedEl = document.querySelector('[data-corr-decrypted]') as HTMLElement
 const corrVerdictEl = document.querySelector('[data-corr-verdict]') as HTMLElement
+const corrMismatchEl = document.querySelector('[data-corr-mismatch]') as HTMLElement
+const corrWrapNoteEl = document.querySelector('[data-corr-wrap-note]') as HTMLElement
 const corrTracksEl = document.querySelector('.corr-tracks') as HTMLElement
 const peekToggle = document.querySelector('[data-peek-toggle]') as HTMLButtonElement
 const peekBody = document.querySelector('[data-peek-body]') as HTMLElement
@@ -283,6 +299,10 @@ function resetCorrespondence(): void {
   corrCtSumEl.textContent = 'Enc(sum)'
   corrDecryptedEl.textContent = '?'
   corrVerdictEl.hidden = true
+  corrMismatchEl.hidden = true
+  corrWrapNoteEl.hidden = true
+  corrWrapNoteEl.textContent = ''
+  plainSum = null
   corrTracksEl.classList.remove('corr-tracks--matched')
 }
 
@@ -312,12 +332,23 @@ async function encryptCurrentInputs(): Promise<void> {
   // Populate the plaintext + ciphertext tracks; the sum fills in after compute.
   corrPlainAEl.textContent = `a = ${a}`
   corrPlainBEl.textContent = `b = ${b}`
-  corrPlainSumEl.textContent = String(a + b)
+  // Both tracks are u8: the plaintext track must wrap mod 256 exactly as
+  // FheUint8 does, otherwise a + b > 255 would show two different numbers.
+  plainSum = wrapU8(a + b)
+  corrPlainSumEl.textContent = String(plainSum)
+  if (a + b >= U8_MODULUS) {
+    corrWrapNoteEl.textContent = `${a} + ${b} = ${a + b}, which overflows one byte, so the u8 answer is ${a + b} − 256 = ${plainSum}. FheUint8 is mod 256 too — the ciphertext track wraps the same way, which is why the two still agree.`
+    corrWrapNoteEl.hidden = false
+  } else {
+    corrWrapNoteEl.textContent = ''
+    corrWrapNoteEl.hidden = true
+  }
   corrCtAEl.textContent = `Enc(${a})·${digestA.slice(0, 4)}`
   corrCtBEl.textContent = `Enc(${b})·${digestB.slice(0, 4)}`
   corrCtSumEl.textContent = 'Enc(sum)'
   corrDecryptedEl.textContent = '?'
   corrVerdictEl.hidden = true
+  corrMismatchEl.hidden = true
   corrTracksEl.classList.remove('corr-tracks--matched')
 
   // A fresh encryption invalidates any prior computed result.
@@ -429,18 +460,25 @@ computeButton.addEventListener('click', async () => {
     // Complete the correspondence: decrypted ciphertext-track result equals the
     // plaintext-track sum, making Enc(a) ⊞ Enc(b) = Enc(a + b) literally visible.
     corrDecryptedEl.textContent = String(resultValue)
-    corrVerdictEl.hidden = false
+    // The verdict is EARNED, not assumed: compare the decrypted ciphertext-track
+    // result against the plaintext-track u8 sum and only claim a match when the
+    // two numbers are actually equal. If they differ, say so instead.
+    const tracksMatch = plainSum !== null && resultValue === plainSum
+    corrVerdictEl.hidden = !tracksMatch
+    corrMismatchEl.hidden = tracksMatch
     // Static (motion-free) emphasis: mark the tracks matched so the "same answer"
     // link and both result cells get a persistent highlight — the payoff moment
     // gets visual weight without any count-up or flash animation.
-    corrTracksEl.classList.add('corr-tracks--matched')
+    corrTracksEl.classList.toggle('corr-tracks--matched', tracksMatch)
 
     state.setState('REVEALED')
     resultBar.classList.add('revealed')
     await animateCountUp(resultValueEl, resultValue)
     // Announce the final total once, after the visual count-up settles, so
     // screen readers aren't flooded with the intermediate tween values.
-    resultAnnounceEl.textContent = `The Oracle computed on ciphertext only. Decrypted locally, the sum is ${resultValue}.`
+    resultAnnounceEl.textContent = tracksMatch
+      ? `The Oracle computed on ciphertext only. Decrypted locally, the sum is ${resultValue}, matching the plaintext track.`
+      : `The Oracle computed on ciphertext only. Decrypted locally, the result is ${resultValue}, which does NOT match the plaintext track's ${plainSum}.`
   } catch (error) {
     if (error instanceof OracleTimeoutError) {
       setError('Oracle timed out after 45s. Use retry.')

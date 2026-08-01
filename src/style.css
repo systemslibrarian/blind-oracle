@@ -1738,6 +1738,33 @@ html[data-theme='light'] .corr-verdict {
   background-color: rgba(13, 111, 94, 0.06);
 }
 
+/* Mismatch verdict: same shape as the match verdict, warning palette. Shown only
+   when the decrypted result genuinely differs from the plaintext u8 sum. */
+.corr-verdict-mismatch {
+  border-color: var(--orange-soft);
+  background-color: rgba(255, 123, 69, 0.08);
+  color: #ffece3;
+}
+
+html[data-theme='light'] .corr-verdict-mismatch {
+  color: #4a1c08;
+  background-color: rgba(191, 79, 32, 0.08);
+}
+
+.corr-verdict-mismatch .corr-verdict-icon,
+html[data-theme='light'] .corr-verdict-mismatch .corr-verdict-icon {
+  color: var(--orange);
+}
+
+/* Wraparound note under the plaintext row: surfaces the mod-256 truncation as a
+   property of the u8 type, shared by both tracks. */
+.corr-wrap-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--orange);
+}
+
 @media (min-width: 981px) {
   .corr-tracks {
     flex-direction: row;
