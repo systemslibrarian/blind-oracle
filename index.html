@@ -16,14 +16,14 @@
     <meta property="og:title" content="Blind Oracle — Fully Homomorphic Encryption Demo" />
     <meta
       property="og:description"
-      content="Watch a server compute on encrypted data it can never read. Real TFHE-rs gate bootstrapping, running in your browser."
+      content="Watch a server compute on encrypted data it can never read. Real TFHE-rs programmable bootstrapping, running in your browser."
     />
     <meta property="og:url" content="https://systemslibrarian.github.io/crypto-lab-blind-oracle/" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Blind Oracle — Fully Homomorphic Encryption Demo" />
     <meta
       name="twitter:description"
-      content="Watch a server compute on encrypted data it can never read. Real TFHE-rs gate bootstrapping, running in your browser."
+      content="Watch a server compute on encrypted data it can never read. Real TFHE-rs programmable bootstrapping, running in your browser."
     />
 
     <link
@@ -309,7 +309,7 @@
       <header class="cl-hero">
         <div class="cl-hero-main">
           <h1 class="cl-hero-title">Blind Oracle</h1>
-          <p class="cl-hero-sub">FHE · TFHE-rs · gate bootstrapping</p>
+          <p class="cl-hero-sub">FHE · TFHE-rs · programmable bootstrapping</p>
           <p class="cl-hero-desc">
             Encrypt two numbers in your browser, let an untrusted Oracle add the ciphertexts it can
             never read, then decrypt the sum locally.
@@ -337,7 +337,7 @@
             <li>Your browser decrypts locally and reveals the sum.</li>
           </ol>
           <p class="explain-note">
-            This is Fully Homomorphic Encryption (TFHE-rs, gate bootstrapping
+            This is Fully Homomorphic Encryption (TFHE-rs, programmable bootstrapping
             <span class="inline-gloss">bootstrapping = noise reset</span>). The &ldquo;plaintext
             world vs ciphertext world&rdquo; panel below shows <em>why</em> the encrypted result
             decrypts to the right answer.
@@ -388,7 +388,7 @@
       <section class="zone zone-wire" aria-labelledby="wire-heading">
         <h2 class="zone-label zone-label-wire" id="wire-heading">ENCRYPTED WIRE</h2>
         <div class="scheme-badge">
-          <span>TFHE-rs · Gate Bootstrapping · True FHE</span>
+          <span>TFHE-rs · Programmable Bootstrapping · True FHE</span>
           <button
             class="info-btn"
             data-open-info
@@ -432,11 +432,11 @@
         </div>
 
         <div class="noise-explainer">
-          <h3 class="noise-title">GATE BOOTSTRAPPING &amp; THE NOISE BUDGET</h3>
+          <h3 class="noise-title">PROGRAMMABLE BOOTSTRAPPING &amp; THE NOISE BUDGET</h3>
           <p class="noise-text">
             Every TFHE ciphertext hides its value under random <em>noise</em>. Each operation grows
-            that noise; too much and decryption fails. <strong>Gate bootstrapping</strong> resets
-            the noise after every gate so you can keep computing — but each reset is expensive,
+            that noise; too much and decryption fails. <strong>Programmable bootstrapping</strong> (PBS) resets
+            the noise on every operation so you can keep computing — but each reset is expensive,
             which is why real FHE programs stay small.
           </p>
           <div
@@ -594,7 +594,7 @@
               class="peek-lattice"
               tabindex="0"
               role="img"
-              aria-label="Encrypting the value 3 places it in one signal slot, then buries it under a row of random noise bits. Adding two such ciphertexts adds both the values and the noise, so the sum carries more noise than either input; when noise reaches the ceiling, gate bootstrapping resets it so computation can continue."
+              aria-label="Encrypting the value 3 places it in one signal slot, then buries it under a row of random noise bits. Adding two such ciphertexts adds both the values and the noise, so the sum carries more noise than either input; when noise reaches the ceiling, programmable bootstrapping resets it so computation can continue."
             >
               <div class="peek-sample">
                 <span class="peek-sample-label">Enc(3) =</span>
@@ -702,12 +702,12 @@
       <div class="info-content">
         <p>FHE lets a server compute on your encrypted data without ever decrypting it.</p>
         <p>
-          <strong>TFHE-rs</strong> uses gate bootstrapping: every operation refreshes the ciphertext
+          <strong>TFHE-rs</strong> uses programmable bootstrapping (PBS): every operation refreshes the ciphertext
           noise, so you can keep computing without hitting a fixed circuit-depth wall — unlike
           leveled schemes that budget for a preset number of operations.
         </p>
         <p>
-          But bootstrapping is not free. Each gate pays a real bootstrapping cost, so in practice
+          But bootstrapping is not free. Each block-level operation pays a real bootstrapping cost, so in practice
           FHE programs stay small and slow — the response time shown for even a single add is the
           price you are watching. FHE removes the depth limit; it does not remove the cost.
         </p>

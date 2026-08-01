@@ -2,7 +2,9 @@
  * TFHE-rs WASM Client
  *
  * Uses Zama AI's TFHE-rs library for true fully homomorphic encryption.
- * Gate bootstrapping occurs on every operation - no circuit depth limit.
+ * FheUint8 values are radix-decomposed into shortint blocks, and each block
+ * operation runs a programmable bootstrap (PBS) - no circuit depth limit.
+ * (Gate bootstrapping is the term for TFHE's boolean API, which this does not use.)
  *
  * CRITICAL: Client key NEVER leaves this browser.
  * Server receives only the compressed server key for evaluation.
@@ -33,8 +35,8 @@ function validateValue(value: number): void {
 /**
  * Initialize TFHE-rs WASM and generate key pair.
  *
- * Key generation takes 10-15 seconds in browser due to gate bootstrapping
- * key material. This is the cost of true FHE — unlimited computation depth.
+ * Key generation takes 10-15 seconds in browser due to the bootstrapping
+ * key material (bootstrap key plus key-switching key). This is the cost of true FHE — unlimited computation depth.
  */
 export async function initFhe(): Promise<FheContext> {
   console.log('[FHE] TFHE-rs WebAssembly loading...')
@@ -61,7 +63,7 @@ export async function initFhe(): Promise<FheContext> {
   const keyGenTimeMs = Math.round(performance.now() - startTime)
 
   console.log(
-    `[FHE] TFHE-rs WASM ready. Key gen: ${(keyGenTimeMs / 1000).toFixed(1)}s. Gate bootstrapping: ACTIVE.`
+    `[FHE] TFHE-rs WASM ready. Key gen: ${(keyGenTimeMs / 1000).toFixed(1)}s. Programmable bootstrapping: ACTIVE.`
   )
   console.log(`[FHE] Server key size: ${(serverKeyBytes.length / 1024 / 1024).toFixed(2)} MB`)
 

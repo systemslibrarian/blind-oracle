@@ -24,8 +24,8 @@ export class OracleLog {
     this.append('[SYSTEM] TFHE-rs WebAssembly loading...')
     this.append(`[SYSTEM] Generating FHE key pair — please wait...`)
     this.append(`[SYSTEM] Key generation complete: ${keyGenSec}s`)
-    this.append('[SYSTEM] Gate bootstrapping: ACTIVE (noise refreshed per gate)')
-    this.append('[SYSTEM] No fixed circuit-depth wall — but every gate pays a bootstrap cost.')
+    this.append('[SYSTEM] Programmable bootstrapping: ACTIVE (noise refreshed per block op)')
+    this.append('[SYSTEM] No fixed circuit-depth wall — but every block op pays a bootstrap cost.')
     this.append('[SYSTEM] Compressed server key derived (evaluation only, cannot decrypt).')
     this.append('[SYSTEM] READY. True FHE enabled.')
   }
@@ -52,7 +52,7 @@ export class OracleLog {
     bootstrapping: string,
     resultDigest: string
   ): void {
-    this.append('[ORACLE] FheUint8 addition — gate bootstrapping on every operation')
+    this.append('[ORACLE] FheUint8 addition — programmable bootstrapping on every block op')
     this.append(`[ORACLE] Scheme: ${scheme} (Zama AI)`)
     this.append(`[ORACLE] Bootstrapping: ${bootstrapping}`)
     this.append('[ORACLE] Plaintext accessed: FALSE (no client key present)')
