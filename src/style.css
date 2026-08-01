@@ -3,6 +3,14 @@
   --bg: #07070f;
   --green: #00ffcc;
   --green-soft: rgba(0, 255, 204, 0.35);
+  /* Control boundaries only (input[type="number"]). The number fields are filled
+     with a faint green wash that sits 1.19:1 from the canvas behind them, so the
+     border is the only thing that renders the field's edge — WCAG 2.1 SC 1.4.11
+     requires 3:1. --green-soft resolved to #055e51 here and measured 2.73:1 at
+     best / 1.09:1 at worst. --border-strong is 4.29:1 on --bg and 3.31:1 on the
+     field's own fill. --green-soft is unchanged and still drives the decorative
+     rules (zone outlines, wire chips, panel edges, action-button borders). */
+  --border-strong: #397f75;
   --orange: #ff7b45;
   --orange-soft: rgba(255, 123, 69, 0.4);
   --wire: rgba(255, 255, 255, 0.5);
@@ -17,6 +25,8 @@ html[data-theme='light'] {
   --bg: #f3fbf7;
   --green: #0d6f5e;
   --green-soft: rgba(13, 111, 94, 0.35);
+  /* 3.70:1 on --bg, 3.41:1 on the field's own fill (was 1.70:1 / 1.29:1). */
+  --border-strong: #6d8781;
   --orange: #bf4f20;
   --orange-soft: rgba(191, 79, 32, 0.4);
   --wire: rgba(7, 7, 15, 0.6);
@@ -306,7 +316,7 @@ html[data-theme='light'] .theme-toggle:hover {
 input[type='number'] {
   width: 100%;
   background-color: rgba(0, 255, 204, 0.08);
-  border: 2px solid var(--green-soft);
+  border: 2px solid var(--border-strong);
   color: var(--green);
   font-family: 'Share Tech Mono', monospace;
   font-size: 32px;
