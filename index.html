@@ -435,9 +435,10 @@
           <h3 class="noise-title">PROGRAMMABLE BOOTSTRAPPING &amp; THE NOISE BUDGET</h3>
           <p class="noise-text">
             Every TFHE ciphertext hides its value under random <em>noise</em>. Each operation grows
-            that noise; too much and decryption fails. <strong>Programmable bootstrapping</strong> (PBS) resets
-            the noise on every operation so you can keep computing — but each reset is expensive,
-            which is why real FHE programs stay small.
+            that noise; too much and decryption fails.
+            <strong>Programmable bootstrapping</strong> (PBS) resets the noise on every operation so
+            you can keep computing — but each reset is expensive, which is why real FHE programs
+            stay small.
           </p>
           <div
             class="noise-diagram"
@@ -702,14 +703,15 @@
       <div class="info-content">
         <p>FHE lets a server compute on your encrypted data without ever decrypting it.</p>
         <p>
-          <strong>TFHE-rs</strong> uses programmable bootstrapping (PBS): every operation refreshes the ciphertext
-          noise, so you can keep computing without hitting a fixed circuit-depth wall — unlike
-          leveled schemes that budget for a preset number of operations.
+          <strong>TFHE-rs</strong> uses programmable bootstrapping (PBS): every operation refreshes
+          the ciphertext noise, so you can keep computing without hitting a fixed circuit-depth wall
+          — unlike leveled schemes that budget for a preset number of operations.
         </p>
         <p>
-          But bootstrapping is not free. Each block-level operation pays a real bootstrapping cost, so in practice
-          FHE programs stay small and slow — the response time shown for even a single add is the
-          price you are watching. FHE removes the depth limit; it does not remove the cost.
+          But bootstrapping is not free. Each block-level operation pays a real bootstrapping cost,
+          so in practice FHE programs stay small and slow — the response time shown for even a
+          single add is the price you are watching. FHE removes the depth limit; it does not remove
+          the cost.
         </p>
         <p>
           The subtle part: the server holds only an <em>evaluation key</em>. It can transform
