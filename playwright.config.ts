@@ -20,7 +20,11 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run preview -- --port 4223 --strictPort',
+    // Build first: `vite preview` only serves whatever is already in `dist/`.
+    // Without the build, a source change that fails to compile leaves the last
+    // good bundle in place and the suite passes green against code that no
+    // longer builds — which silently invalidates mutation checks.
+    command: 'npm run build && npm run preview -- --port 4223 --strictPort',
     url: 'http://localhost:4223/crypto-lab-blind-oracle/',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000
