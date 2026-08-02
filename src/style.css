@@ -2125,3 +2125,186 @@ html[data-theme='light'] .peek-points strong {
     height: 60%;
   }
 }
+
+/* ── Local multiply bench (toy DGHV) ───────────────────────────────────────── */
+
+.zone-toy {
+  grid-column: 1 / -1;
+}
+
+.toy-intro,
+.toy-scale {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e8f5f0;
+  max-width: 90ch;
+}
+
+html[data-theme='light'] .toy-intro,
+html[data-theme='light'] .toy-scale {
+  color: #0a1f1a;
+}
+
+.toy-scale {
+  border-left: 2px solid var(--orange-soft);
+  padding-left: 10px;
+  font-size: 12px;
+}
+
+.toy-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.toy-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  color: #e8f5f0;
+}
+
+html[data-theme='light'] .toy-field {
+  color: #0a1f1a;
+}
+
+.toy-field input {
+  width: 7rem;
+  min-height: 44px;
+  padding: 6px 10px;
+  background-color: rgba(0, 255, 204, 0.06);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: inherit;
+  font: inherit;
+}
+
+.toy-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toy-status {
+  margin: 0 0 12px;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e8f5f0;
+  border: 1px dashed var(--green-soft);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+
+html[data-theme='light'] .toy-status {
+  color: #0a1f1a;
+}
+
+.toy-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--green-soft);
+  border-radius: 4px;
+}
+
+.toy-table {
+  width: 100%;
+  min-width: 46rem;
+  border-collapse: collapse;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  color: #e8f5f0;
+}
+
+html[data-theme='light'] .toy-table {
+  color: #0a1f1a;
+}
+
+.toy-table caption {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #e8f5f0;
+}
+
+html[data-theme='light'] .toy-table caption {
+  color: #0a1f1a;
+}
+
+.toy-table th,
+.toy-table td {
+  text-align: left;
+  padding: 7px 10px;
+  border-top: 1px solid var(--green-soft);
+  vertical-align: top;
+}
+
+.toy-table thead th {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.toy-table tr.toy-ok td:last-child {
+  color: var(--green);
+}
+
+.toy-table tr.toy-bad td:last-child {
+  color: var(--orange);
+}
+
+.toy-verdict {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e8f5f0;
+  border-left: 3px solid var(--green);
+  padding: 8px 12px;
+  background-color: rgba(0, 255, 204, 0.06);
+  max-width: 90ch;
+}
+
+html[data-theme='light'] .toy-verdict {
+  color: #0a1f1a;
+  background-color: rgba(13, 111, 94, 0.08);
+}
+
+.toy-verdict-bad {
+  border-left-color: var(--orange);
+  background-color: rgba(255, 123, 69, 0.08);
+}
+
+html[data-theme='light'] .toy-verdict-bad {
+  background-color: rgba(191, 79, 32, 0.08);
+}
+
+/* ── Degraded mode banner ──────────────────────────────────────────────────── */
+
+.offline-banner {
+  margin: 0;
+  padding: 10px 16px;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #ffece3;
+  background-color: rgba(255, 123, 69, 0.1);
+  border-bottom: 1px solid var(--orange-soft);
+}
+
+html[data-theme='light'] .offline-banner {
+  color: #4a1c08;
+  background-color: rgba(191, 79, 32, 0.1);
+}
+
+.offline-banner a {
+  color: inherit;
+}
+
+.boot-offline {
+  margin-top: 8px;
+}

@@ -299,8 +299,13 @@
           Generating your key pair in-browser (~10–15s). Your secret key never leaves this device.
         </p>
         <button class="action action-green boot-retry" data-boot-retry hidden>[ RETRY ]</button>
+        <button class="action action-ghost boot-offline" data-boot-offline hidden>
+          [ CONTINUE WITHOUT THE ORACLE ]
+        </button>
       </div>
     </div>
+
+    <p class="offline-banner" data-offline-banner role="status" hidden></p>
 
     <button class="theme-toggle" data-theme-toggle aria-label="Switch to light mode" hidden>
       🌙
@@ -500,10 +505,13 @@
             [ MULTIPLY — WHY SLOWER? ]
           </button>
           <p id="multiply-why" class="op-why" data-multiply-why hidden>
-            FheUint8 multiply is offered by TFHE-rs too, but each multiply triggers many more gate
-            bootstraps than an add, so it is far slower and heavier — this demo ships add only to
-            keep the round-trip snappy. Homomorphism is general; the cost is what varies per
-            operation.
+            FheUint8 multiply is offered by TFHE-rs too, but each multiply triggers many more
+            programmable bootstraps than an add, so it is far slower and heavier — the Oracle ships
+            add only to keep the round-trip snappy. Homomorphism is general; the cost is what varies
+            per operation. You do not have to take that on trust: the
+            <a href="#toy-multiply">local multiply bench</a> below performs real homomorphic
+            multiplications in this tab, on a scheme with <em>no</em> bootstrapping, so you can
+            watch the noise budget run out and see exactly what TFHE is paying for.
           </p>
         </div>
 
@@ -656,6 +664,91 @@
             </ul>
           </div>
         </div>
+      </section>
+
+      <section class="zone zone-toy" id="toy-multiply" aria-labelledby="toy-heading">
+        <h2 class="zone-label zone-label-orange" id="toy-heading">
+          LOCAL MULTIPLY BENCH — SPEND THE NOISE BUDGET YOURSELF
+        </h2>
+        <p class="toy-intro">
+          The Oracle above does the addition, because Zama's browser build of TFHE-rs ships key
+          generation, encryption and decryption only — it exposes no evaluation operations at all,
+          so the homomorphic step has to run where that API exists. This bench needs no oracle and
+          no network. It runs a second, much smaller homomorphic scheme
+          <strong>entirely in this tab</strong>, and it will do the multiplication the button above
+          only describes.
+        </p>
+        <p class="toy-scale">
+          <strong>Toy scale, stated plainly.</strong> This is DGHV (van
+          Dijk–Gentry–Halevi–Vaikuntanathan, 2010) in its symmetric form:
+          <code>Enc(m) = m + 256r + qp</code>, <code>Dec(c) = (c mod p) mod 256</code>, with a
+          48-bit secret <code>p</code>. The original scheme needs a modulus of millions of bits
+          before its hardness assumption means anything, so
+          <strong>this is not secure encryption</strong>
+          and must never be used as such. What is exactly right about it is the arithmetic: addition
+          adds the noise, multiplication multiplies it, and when the noise passes p/2 decryption
+          stops being correct. That ceiling is the reason TFHE bootstraps.
+        </p>
+
+        <div class="toy-controls">
+          <label class="toy-field">
+            <span>a</span>
+            <input
+              type="number"
+              min="0"
+              max="255"
+              value="12"
+              data-toy-a
+              aria-label="Toy bench value a"
+            />
+          </label>
+          <label class="toy-field">
+            <span>b</span>
+            <input
+              type="number"
+              min="0"
+              max="255"
+              value="21"
+              data-toy-b
+              aria-label="Toy bench value b"
+            />
+          </label>
+          <div class="toy-buttons">
+            <button class="action action-orange" type="button" data-toy-mul>[ × Enc(b) ]</button>
+            <button class="action action-orange action-ghost-orange" type="button" data-toy-add>
+              [ + Enc(b) ]
+            </button>
+            <button class="action action-ghost" type="button" data-toy-reset>
+              [ RESET BENCH ]
+            </button>
+          </div>
+        </div>
+
+        <p class="toy-status" data-toy-status role="status" aria-live="polite">
+          Bench idle. Press an operation to encrypt a and start a chain.
+        </p>
+
+        <div class="toy-table-wrap">
+          <table class="toy-table" data-toy-table>
+            <caption data-toy-caption>
+              No chain yet.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Expression</th>
+                <th scope="col">Noise / budget</th>
+                <th scope="col">Ciphertext size</th>
+                <th scope="col">Decrypts to</th>
+                <th scope="col">Should be</th>
+                <th scope="col">Verdict</th>
+              </tr>
+            </thead>
+            <tbody data-toy-rows></tbody>
+          </table>
+        </div>
+
+        <p class="toy-verdict" data-toy-verdict hidden></p>
       </section>
     </main>
 

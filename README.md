@@ -4,6 +4,21 @@
 
 Blind Oracle is a browser-to-server demonstration of **Fully Homomorphic Encryption** using [TFHE-rs](https://github.com/zama-ai/tfhe-rs) and programmable bootstrapping (PBS) over encrypted `FheUint8` values. An `FheUint8` is radix-decomposed into shortint blocks and each block operation runs a PBS; _gate_ bootstrapping is the term for TFHE's boolean API, which this demo does not use. The client encrypts two inputs, the server performs homomorphic addition, and the client decrypts the encrypted result locally. This solves the problem of outsourcing computation while keeping plaintext hidden from the compute provider. The security model is asymmetric homomorphic encryption (public evaluation key on the server, secret decryption key kept client-side), with post-quantum lattice-based foundations through TFHE.
 
+### Why one step runs off-device
+
+Every crypto-lab demo is browser-only, and this one is the exception in exactly one place: the homomorphic **add** runs on a small remote service. That is not a shortcut. Zama's browser (WASM) build of TFHE-rs exposes key generation, encryption, decryption and serialization — and no evaluation operations at all: there is no `add`, `mul` or any other homomorphic method on `FheUint8` in the bundled `tfhe.d.ts`, and `set_server_key` has nothing to apply. The evaluation therefore has to happen where the TFHE-rs evaluation API exists. That split is also, conveniently, the real FHE deployment shape: a client that holds the secret key, and a compute provider that holds only an evaluation key.
+
+Two things follow, and the demo now does both:
+
+- **A remote dependency must degrade, not dead-end.** If the Oracle is asleep, redeployed, or gone for good, the page offers _Continue without the Oracle_ and keeps everything local working — key generation, encryption, the ciphertext inspector, and the local multiply bench — with a banner naming exactly which one step is unavailable.
+- **A multiplication that is only described is not demonstrated.** The **local multiply bench** performs real homomorphic multiplications in the tab, on a second (deliberately tiny) scheme, and lets you keep going until the noise budget runs out.
+
+### The local multiply bench
+
+`src/toyFhe.ts` implements DGHV (van Dijk–Gentry–Halevi–Vaikuntanathan, 2010) in its symmetric form: `Enc(m) = m + 256r + qp`, `Dec(c) = (c mod p) mod 256`. Addition adds the noise term; multiplication multiplies it. With a 48-bit secret `p` the budget is 47 bits of noise, so a chain of hundreds of additions stays correct while the **third** multiplication overruns the ceiling and decryption starts returning the wrong number — which the bench reports, per step, against the plaintext answer it should have produced.
+
+**Toy scale, stated on the page and here:** the original scheme needs a modulus of millions of bits before its approximate-GCD hardness assumption means anything. This is not secure encryption and must never be used as such. What is exactly right about it is the arithmetic and the ceiling — and that ceiling is precisely what TFHE's programmable bootstrapping exists to reset, and what the Oracle's response time is paying for.
+
 Beyond the "the server literally cannot read this" reveal, the demo now makes the _mechanism_ visible: a side-by-side **plaintext world vs ciphertext world** panel runs both computations at once so the homomorphic correspondence `Enc(a) ⊞ Enc(b) → decrypt = a + b` is shown rather than asserted; **value-dependent ciphertext fingerprints** plus a **Re-encrypt same values** control demonstrate that TFHE encryption is probabilistic (same number, different ciphertext, still-correct sum); a **schematic wire** animates the actual payloads (`ct_a`, `ct_b`, `serverKey`, `ct_result`) crossing the trust boundary while the secret key stays pinned client-side; and a short **gate-bootstrapping / noise-budget** explainer plus an honest cost framing replace the earlier "unlimited computation depth" over-claim.
 
 ## When to Use It
@@ -18,7 +33,7 @@ Beyond the "the server literally cannot read this" reveal, the demo now makes th
 
 **[systemslibrarian.github.io/crypto-lab-blind-oracle](https://systemslibrarian.github.io/crypto-lab-blind-oracle/)**
 
-Watch a server add two numbers it can never read: the math happens on ciphertext, and only your browser holds the key to decrypt the answer. Enter two secret values in the 0–255 range, encrypt and transmit them, and trigger homomorphic addition on the oracle. The UI shows ciphertext previews with value-dependent fingerprints, a schematic of the payloads crossing the wire, the parallel plaintext-vs-ciphertext tracks that fill in as you compute, a gate-bootstrapping/noise explainer, response time (the price of one homomorphic add), the oracle log, and a modal showing exactly what the oracle received — without plaintext access. Controls: **SECRET VALUE A**, **SECRET VALUE B**, **ENCRYPT & TRANSMIT**, **RE-ENCRYPT SAME VALUES** (fresh randomness, different ciphertext), **COMPUTE (FHE ADD)**, **MULTIPLY — WHY SLOWER?** (explains the operation/cost tradeoff), **WHAT THE ORACLE SAW**, and **RESET**.
+Watch a server add two numbers it can never read: the math happens on ciphertext, and only your browser holds the key to decrypt the answer. Enter two secret values in the 0–255 range, encrypt and transmit them, and trigger homomorphic addition on the oracle. The UI shows ciphertext previews with value-dependent fingerprints, a schematic of the payloads crossing the wire, the parallel plaintext-vs-ciphertext tracks that fill in as you compute, a gate-bootstrapping/noise explainer, response time (the price of one homomorphic add), the oracle log, and a modal showing exactly what the oracle received — without plaintext access. Below that, the **local multiply bench** does real homomorphic multiplications in your browser with no oracle at all, until the noise budget runs out. Controls: **SECRET VALUE A**, **SECRET VALUE B**, **ENCRYPT & TRANSMIT**, **RE-ENCRYPT SAME VALUES** (fresh randomness, different ciphertext), **COMPUTE (FHE ADD)**, **MULTIPLY — WHY SLOWER?** (explains the operation/cost tradeoff, and links to the local bench that performs one), **WHAT THE ORACLE SAW**, and **RESET**.
 
 > First load generates an FHE key pair in your browser (~10–15s) — a boot overlay shows progress. On the free-tier backend, the oracle may also take a moment to wake from cold start.
 
@@ -31,6 +46,8 @@ Backend API source: <https://github.com/systemslibrarian/blind-oracle-api>
 - **No result integrity:** homomorphic evaluation hides inputs but does not by itself prove the server computed the right function — a malicious server could return a wrong-but-valid ciphertext.
 - **Metadata still leaks:** request timing, ciphertext sizes, and access patterns remain visible to the server even though plaintext does not.
 - **Client-side key management:** security depends entirely on the client key never leaking — lose it and the data is unrecoverable, expose it and confidentiality is gone.
+- **The Oracle is a free-tier service and can be unavailable.** The demo handles that explicitly (degraded mode) rather than pretending otherwise, but the headline add genuinely does require it.
+- **The local bench is a teaching model, not encryption.** 48-bit DGHV is trivially breakable. It is there for the noise budget, which it models exactly.
 
 ## Real-World Usage
 
@@ -80,6 +97,7 @@ In development, `/api` is proxied to the hosted backend via Vite (see `vite.conf
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/main.ts`         | UI wiring, app state transitions, boot overlay, event handlers                                                                                                |
 | `src/clientFhe.ts`    | TFHE-rs WASM: key generation, encryption, decryption                                                                                                          |
+| `src/toyFhe.ts`       | Toy DGHV scheme powering the local multiply bench: encrypt/add/multiply/decrypt plus exact noise-budget tracking (unit-tested)                                |
 | `src/apiClient.ts`    | Typed fetch client for the oracle, with timeouts and error taxonomy                                                                                           |
 | `src/encoding.ts`     | Pure base64/hex helpers, FheUint8 range validation, and a non-cryptographic ciphertext fingerprint used only to render value-dependent swatches (unit-tested) |
 | `src/stateMachine.ts` | Minimal observable state machine driving the UI (unit-tested)                                                                                                 |
@@ -88,17 +106,18 @@ In development, `/api` is proxied to the hosted backend via Vite (see `vite.conf
 
 ## Scripts
 
-| Script                 | What it does                              |
-| ---------------------- | ----------------------------------------- |
-| `npm run dev`          | Start the Vite dev server                 |
-| `npm run build`        | Type-check and build for production       |
-| `npm run preview`      | Serve the production build locally        |
-| `npm test`             | Run the Vitest unit suite                 |
-| `npm run test:watch`   | Run tests in watch mode                   |
-| `npm run typecheck`    | Type-check without emitting               |
-| `npm run format`       | Format the codebase with Prettier         |
-| `npm run format:check` | Verify formatting (used in CI)            |
-| `npm run deploy`       | Build and publish `dist/` to GitHub Pages |
+| Script                 | What it does                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run dev`          | Start the Vite dev server                                                                          |
+| `npm run build`        | Type-check and build for production                                                                |
+| `npm run preview`      | Serve the production build locally                                                                 |
+| `npm test`             | Run the Vitest unit suite                                                                          |
+| `npm run test:watch`   | Run tests in watch mode                                                                            |
+| `npm run typecheck`    | Type-check without emitting                                                                        |
+| `npm run format`       | Format the codebase with Prettier                                                                  |
+| `npm run format:check` | Verify formatting (used in CI)                                                                     |
+| `npm run test:a11y`    | Playwright: axe WCAG A/AA scans plus the functional Oracle, degraded-mode and multiply-bench specs |
+| `npm run deploy`       | Build and publish `dist/` to GitHub Pages                                                          |
 
 ## Security Notes
 

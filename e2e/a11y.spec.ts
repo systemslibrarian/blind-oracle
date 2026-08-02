@@ -15,8 +15,10 @@ async function expandAll(page: Page): Promise<void> {
       details.open = true
     }
     // The boot overlay covers the page until the WASM FHE runtime finishes
-    // loading, which never completes in a headless preview (no cross-origin
-    // isolation). Hide it so axe can scan the underlying content.
+    // loading and the Oracle answers a health check. The preview server now
+    // sends COOP/COEP (see vite.config.ts) so the runtime does start here, but
+    // the Oracle is a real remote service and this scan should not depend on
+    // it. Hide the overlay so axe scans the underlying content either way.
     document
       .querySelectorAll<HTMLElement>('[data-boot-overlay]')
       .forEach((el) => el.classList.add('boot-overlay--hidden'))

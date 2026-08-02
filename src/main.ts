@@ -19,6 +19,7 @@ import {
 import { base64ToHex, base64ToUint8Array, ciphertextFingerprint } from './encoding'
 import { OracleLog } from './oracleLog'
 import { StateMachine } from './stateMachine'
+import { ToyChain, TOY_P_BITS, type ChainStep } from './toyFhe'
 
 const state = new StateMachine('BOOTING')
 
@@ -93,6 +94,17 @@ const themeToggleBtn = document.querySelector('[data-theme-toggle]') as HTMLButt
 const bootOverlay = document.querySelector('[data-boot-overlay]') as HTMLElement
 const bootDetailEl = document.querySelector('[data-boot-detail]') as HTMLElement
 const bootRetryBtn = document.querySelector('[data-boot-retry]') as HTMLButtonElement
+const bootOfflineBtn = document.querySelector('[data-boot-offline]') as HTMLButtonElement
+const offlineBanner = document.querySelector('[data-offline-banner]') as HTMLElement
+const toyAInput = document.querySelector('[data-toy-a]') as HTMLInputElement
+const toyBInput = document.querySelector('[data-toy-b]') as HTMLInputElement
+const toyMulBtn = document.querySelector('[data-toy-mul]') as HTMLButtonElement
+const toyAddBtn = document.querySelector('[data-toy-add]') as HTMLButtonElement
+const toyResetBtn = document.querySelector('[data-toy-reset]') as HTMLButtonElement
+const toyStatusEl = document.querySelector('[data-toy-status]') as HTMLElement
+const toyRowsEl = document.querySelector('[data-toy-rows]') as HTMLElement
+const toyCaptionEl = document.querySelector('[data-toy-caption]') as HTMLElement
+const toyVerdictEl = document.querySelector('[data-toy-verdict]') as HTMLElement
 
 const oracleLog = new OracleLog(logEl)
 const animator = new WireAnimator()
@@ -157,10 +169,40 @@ function lockControls(): void {
 
 /** Re-enable controls after work finishes. Compute/re-encrypt require live ciphertext. */
 function unlockControls(): void {
-  encryptButton.disabled = false
+  const fheReady = degraded !== 'fhe-unavailable'
+  encryptButton.disabled = !fheReady
   resetBtn.disabled = false
-  computeButton.disabled = !(cipherA && cipherB)
-  reencryptButton.disabled = !(cipherA && cipherB)
+  computeButton.disabled = !(cipherA && cipherB) || degraded !== 'none'
+  reencryptButton.disabled = !(cipherA && cipherB) || !fheReady
+}
+
+/**
+ * Degraded mode. The Oracle is a remote service on a free tier; when it is
+ * asleep, unreachable, or gone, the page used to dead-end behind a boot overlay
+ * with nothing but a retry button — every local capability (key generation,
+ * encryption, the ciphertext inspector, the whole local multiply bench) was
+ * locked behind a failure that had nothing to do with any of them.
+ *
+ * Now the failure is scoped to the thing that actually failed, and the page says
+ * plainly which parts still work.
+ */
+type DegradedMode = 'none' | 'oracle-offline' | 'fhe-unavailable'
+let degraded: DegradedMode = 'none'
+
+function enterDegraded(mode: Exclude<DegradedMode, 'none'>, detail: string): void {
+  degraded = mode
+  offlineBanner.hidden = false
+  offlineBanner.innerHTML =
+    mode === 'oracle-offline'
+      ? `<strong>Oracle unreachable.</strong> ${detail} Key generation, encryption, the ciphertext ` +
+        'inspector and the <a href="#toy-multiply">local multiply bench</a> all run in this browser ' +
+        'and still work — only the remote homomorphic add is unavailable. Reload to try the Oracle again.'
+      : `<strong>TFHE runtime unavailable.</strong> ${detail} The <a href="#toy-multiply">local ` +
+        'multiply bench</a> below does not use TFHE and still runs in full.'
+  hideBootOverlay()
+  bootOverlay.classList.remove('boot-overlay--error')
+  clearError()
+  unlockControls()
 }
 
 syncThemeToggle(getCurrentTheme())
@@ -176,8 +218,15 @@ state.onChange((next) => {
   }
 })
 
+/** What entering degraded mode would mean, if the learner chooses to. */
+let pendingDegraded: { mode: Exclude<DegradedMode, 'none'>; detail: string } | null = null
+
 async function boot(): Promise<void> {
   clearError()
+  pendingDegraded = null
+  bootOfflineBtn.hidden = true
+  offlineBanner.hidden = true
+  degraded = 'none'
   bootRetryBtn.hidden = true
   bootOverlay.classList.remove('boot-overlay--error', 'boot-overlay--hidden')
   state.setState('BOOTING')
@@ -187,9 +236,11 @@ async function boot(): Promise<void> {
 
   // Check SharedArrayBuffer availability (required for TFHE WASM)
   if (!checkSharedArrayBuffer()) {
-    const msg = 'SharedArrayBuffer not available. Ensure the site is cross-origin isolated.'
+    const msg =
+      'SharedArrayBuffer is not available, so TFHE-rs cannot start. The page needs to be cross-origin isolated (COOP/COEP).'
     showBootError(msg)
-    setError(msg)
+    bootOfflineBtn.hidden = false
+    pendingDegraded = { mode: 'fhe-unavailable', detail: msg }
     return
   }
 
@@ -204,7 +255,8 @@ async function boot(): Promise<void> {
       const detail = error instanceof Error ? error.message : 'Unknown initialization error'
       console.error('[FHE] Boot failure:', error)
       showBootError(`Failed to initialize FHE runtime: ${detail}`)
-      setError(`Failed to initialize FHE runtime: ${detail}`)
+      bootOfflineBtn.hidden = false
+      pendingDegraded = { mode: 'fhe-unavailable', detail: `Initialization failed: ${detail}.` }
       return
     }
   }
@@ -214,6 +266,8 @@ async function boot(): Promise<void> {
   const healthy = await checkHealth()
 
   if (healthy) {
+    degraded = 'none'
+    offlineBanner.hidden = true
     hideBootOverlay()
     unlockControls()
     state.setState('READY')
@@ -229,6 +283,8 @@ async function boot(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 3000))
     const ok = await checkHealth()
     if (ok) {
+      degraded = 'none'
+      offlineBanner.hidden = true
       hideBootOverlay()
       unlockControls()
       state.setState('READY')
@@ -236,12 +292,25 @@ async function boot(): Promise<void> {
     }
   }
 
-  showBootError('Oracle did not wake in time (free-tier cold start). Please retry.')
-  setError('Oracle did not wake in time. Please retry.')
+  showBootError(
+    'Oracle did not wake in time (free-tier cold start). Retry, or continue without it.'
+  )
+  bootOfflineBtn.hidden = false
+  pendingDegraded = {
+    mode: 'oracle-offline',
+    detail:
+      'It did not answer a health check within 45 seconds — a free-tier cold start, a deploy, or a service that is simply gone.'
+  }
 }
 
 bootRetryBtn.addEventListener('click', () => {
   void boot()
+})
+
+bootOfflineBtn.addEventListener('click', () => {
+  if (!pendingDegraded) return
+  bootOfflineBtn.hidden = true
+  enterDegraded(pendingDegraded.mode, pendingDegraded.detail)
 })
 
 function requireReadyContext(): FheContext {
@@ -574,5 +643,116 @@ resetBtn.addEventListener('click', () => {
   clearError()
   state.setState('READY')
 })
+
+/* ── Local multiply bench ──────────────────────────────────────────────────
+ * The Oracle does the add. This does the multiply — locally, with no network,
+ * on a scheme small enough to run in the tab (see src/toyFhe.ts). Every cell in
+ * the table is measured from the chain: what the ciphertext decrypted to, what
+ * it should have been, how many bits of noise it is carrying, and how many bits
+ * of budget remain. The learner is the one who spends the budget.
+ */
+
+let toyChain: ToyChain | null = null
+const toySteps: ChainStep[] = []
+
+function readToyOperands(): { a: number; b: number } {
+  const clamp = (raw: string, fallback: number): number => {
+    const n = Number(raw)
+    if (!Number.isInteger(n) || n < 0 || n > 255) return fallback
+    return n
+  }
+  return { a: clamp(toyAInput.value, 12), b: clamp(toyBInput.value, 21) }
+}
+
+function toyVerdictFor(step: ChainStep): string {
+  if (step.withinBudget) {
+    return step.correct
+      ? 'correct — inside budget'
+      : 'WRONG despite budget — this should not happen'
+  }
+  return step.correct ? 'over budget, correct by luck' : 'WRONG — noise passed the ceiling'
+}
+
+function renderToyChain(): void {
+  toyRowsEl.innerHTML = toySteps
+    .map((step) => {
+      const cls = step.withinBudget ? (step.correct ? 'toy-ok' : 'toy-bad') : 'toy-bad'
+      const label = step.op === 'encrypt' ? 'Enc(a)' : step.op === 'add' ? '+ Enc(b)' : '× Enc(b)'
+      return `<tr class="${cls}">
+        <th scope="row">${step.index}</th>
+        <td>${label} → <code>${step.expression}</code></td>
+        <td>${step.noiseBits} / ${step.budgetBits} bits${step.withinBudget ? '' : ' <strong>OVER</strong>'}</td>
+        <td>${step.ciphertextDigits} digits</td>
+        <td>${step.decrypted}</td>
+        <td>${step.expected}</td>
+        <td>${toyVerdictFor(step)}</td>
+      </tr>`
+    })
+    .join('')
+
+  const last = toySteps[toySteps.length - 1]
+  toyCaptionEl.textContent = last
+    ? `Secret p is ${TOY_P_BITS} bits, so the budget is ${last.budgetBits} bits of noise. ${toySteps.length} step(s) so far.`
+    : 'No chain yet.'
+
+  if (!last) {
+    toyVerdictEl.hidden = true
+    toyVerdictEl.textContent = ''
+    return
+  }
+
+  const multiplies = toySteps.filter((s) => s.op === 'multiply').length
+  const adds = toySteps.filter((s) => s.op === 'add').length
+  const firstBroken = toySteps.find((s) => !s.withinBudget)
+  toyVerdictEl.hidden = false
+  toyVerdictEl.classList.toggle('toy-verdict-bad', Boolean(firstBroken))
+  if (!firstBroken) {
+    toyVerdictEl.textContent =
+      `${multiplies} multiplication(s) and ${adds} addition(s) done under encryption, ` +
+      `every one decrypting to exactly the plaintext answer. Noise is at ${last.noiseBits} of ` +
+      `${last.budgetBits} bits. Keep multiplying.`
+    return
+  }
+  toyVerdictEl.textContent =
+    `The budget ran out at step ${firstBroken.index}: noise reached ${firstBroken.noiseBits} bits ` +
+    `against a ceiling of ${firstBroken.budgetBits}. That step decrypted to ${firstBroken.decrypted} ` +
+    `where the plaintext answer is ${firstBroken.expected}` +
+    (firstBroken.correct
+      ? ' — it happens to agree this time, which past the ceiling is luck rather than a guarantee.'
+      : '.') +
+    ' Nothing here can fix it: this scheme has no bootstrapping. Resetting the noise after every ' +
+    'operation is precisely what TFHE spends its time on, and precisely what the Oracle above is paying for.'
+}
+
+function toyApply(op: 'add' | 'multiply'): void {
+  const { a, b } = readToyOperands()
+  if (!toyChain) {
+    toyChain = new ToyChain(a)
+    toySteps.length = 0
+    toySteps.push(toyChain.start())
+  }
+  toySteps.push(toyChain.apply(op, b, 'b'))
+  const last = toySteps[toySteps.length - 1]
+  toyStatusEl.textContent =
+    `Step ${last.index}: ${op === 'multiply' ? 'multiplied' : 'added'} under encryption. ` +
+    `Decrypted ${last.decrypted}, expected ${last.expected}. ` +
+    `Noise ${last.noiseBits} of ${last.budgetBits} bits${last.withinBudget ? '.' : ' — over the ceiling.'}`
+  renderToyChain()
+}
+
+function toyReset(): void {
+  toyChain = null
+  toySteps.length = 0
+  toyStatusEl.textContent = 'Bench idle. Press an operation to encrypt a and start a chain.'
+  renderToyChain()
+}
+
+toyMulBtn.addEventListener('click', () => toyApply('multiply'))
+toyAddBtn.addEventListener('click', () => toyApply('add'))
+toyResetBtn.addEventListener('click', toyReset)
+// Changing the operands starts a fresh chain rather than silently continuing
+// one built from different numbers.
+toyAInput.addEventListener('change', toyReset)
+toyBInput.addEventListener('change', toyReset)
 
 void boot()
