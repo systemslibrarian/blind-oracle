@@ -26,6 +26,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # The vitest suite: toy-FHE homomorphism, the blinding state machine,
+      # encoding round-trips and the API client. ci.yml runs it, but CI is a
+      # separate workflow that does not gate this one — deploy ran only
+      # test:a11y, so a red unit suite still published.
+      - name: Unit tests
+        run: npm test
       - run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
