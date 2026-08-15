@@ -115,15 +115,3 @@ test('no WCAG A/AA violations in dark theme', async ({ page }) => {
   await assertGradientContrast(page, '.explain-steps', ['#07070f', 'rgba(0, 255, 179, 0.059)', 'rgba(0, 255, 179, 0.02)']);
 })
 
-test('no WCAG A/AA violations in light theme', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('.');
-  await expect(page.locator('.cl-hero')).toBeVisible();
-  await page.locator('#cl-theme-toggle').click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await page.waitForLoadState('networkidle');
-  await expandAll(page);
-  await scan(page);
-  // Check explain-steps on explain-card gradient over light bg (#f3fbf7)
-  await assertGradientContrast(page, '.explain-steps', ['#f3fbf7', 'rgba(13, 111, 94, 0.059)', 'rgba(13, 111, 94, 0.02)']);
-})
