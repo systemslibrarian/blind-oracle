@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@playwright/test'
 
 /**
  * One theme, pinned, with no way to change it.
@@ -24,14 +24,14 @@ import { expect, test } from '@playwright/test';
  * none is VISIBLE, not that none exists.
  */
 test('the page pins the dark theme and offers no way to leave it', async ({ page }) => {
-  await page.goto('.');
+  await page.goto('.')
 
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('#cl-theme-toggle')).toHaveCount(0);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await expect(page.locator('#cl-theme-toggle')).toHaveCount(0)
   await expect(
     page.locator(
       '#theme-toggle:visible, #themeToggle:visible, .theme-toggle:visible,' +
-        ' .theme-toggle-btn:visible, [data-theme-toggle]:visible',
-    ),
-  ).toHaveCount(0);
-});
+        ' .theme-toggle-btn:visible, [data-theme-toggle]:visible'
+    )
+  ).toHaveCount(0)
+})

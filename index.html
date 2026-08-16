@@ -34,15 +34,12 @@
     <script>
       // Dark is the only theme. Pin it before first paint, and overwrite any
       // 'light' a visitor stored back when the header carried a theme toggle.
-      (function () {
+      ;(function () {
         try {
-          localStorage.setItem('theme', 'dark');
-          localStorage.setItem('cv-theme', 'dark');
-          localStorage.setItem('cl-theme', 'dark');
-          localStorage.setItem('crypto-lab-theme', 'dark');
+          localStorage.setItem('theme', 'dark')
         } catch (e) {}
-        document.documentElement.setAttribute('data-theme', 'dark');
-      })();
+        document.documentElement.setAttribute('data-theme', 'dark')
+      })()
     </script>
     <script src="/coi-serviceworker.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -172,8 +169,7 @@
       }
       /* Dark is the only theme, so hide any in-page theme toggle a lab still
      ships. The element stays in the DOM so the lab's theme JS keeps working. */
-      body
-        :is(#theme-toggle, #themeToggle, .theme-toggle, .theme-toggle-btn, [data-theme-toggle]) {
+      body :is(#theme-toggle, #themeToggle, .theme-toggle, .theme-toggle-btn, [data-theme-toggle]) {
         display: none !important;
       }
       @media (max-width: 560px) {
